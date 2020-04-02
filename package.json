@@ -1,0 +1,23 @@
+{
+  "name": "@geekberry/kvstore",
+  "version": "0.0.0",
+  "license": "MIT",
+  "repository": "https://github.com/GeekBerry/kvStore.git",
+  "author": "<geekberry@qq.com>",
+  "main": "index.js",
+  "dependencies": {
+    "lodash": "^4.17.15"
+  },
+  "devDependencies": {
+    "@geekberry/leveldb": "0.0.1",
+    "eslint": "^6.3.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.18.2",
+    "jest": "^24.9.0"
+  },
+  "scripts": {
+    "eslint": "eslint ./src ./test",
+    "test": "jest --runInBand",
+    "public": "yarn publish --access=public"
+  }
+}
