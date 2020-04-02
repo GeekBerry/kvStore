@@ -4,7 +4,10 @@
   "license": "MIT",
   "repository": "https://github.com/GeekBerry/kvStore.git",
   "author": "<geekberry@qq.com>",
-  "main": "index.js",
+  "main": "src/index.js",
+  "files": [
+    "src"
+  ],
   "dependencies": {
     "lodash": "^4.17.15"
   },
