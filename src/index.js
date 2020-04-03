@@ -66,22 +66,17 @@ class KVStore {
 
   // --------------------------------------------------------------------------
   set(name, value) {
-    return new Operate(this.database, { type: 'put', key: this._formatName(name), value });
+    return new Operate.Set(this.database, this._formatName(name), value);
   }
 
   del(name) {
-    return new Operate(this.database, { type: 'del', key: this._formatName(name) });
+    return new Operate.Del(this.database, this._formatName(name));
   }
 
-  async batch(func) {
-    const array = [];
-    await func(operate => {
-      if (!(operate instanceof Operate)) {
-        throw new Error(`${operate} not a instance of Operate`);
-      }
-      array.push(operate.options);
-    });
-    return this.database.batch(array);
+  batch(func) {
+    const batchOperate = new Operate.Batch(this.database);
+    func(operate => batchOperate.push(operate));
+    return batchOperate;
   }
 
   async remove(options = {}) {

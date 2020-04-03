@@ -12,6 +12,7 @@ class Schema {
     this.schema = schema;
   }
 
+  // --------------------------------------------------------------------------
   set(key, value) {
     const type = this.schema[key];
     return this.kvStore.set(key, type(value));
@@ -21,13 +22,7 @@ class Schema {
     return this.kvStore.del(key);
   }
 
-  async get(key) {
-    const value = await this.kvStore.get(key);
-    const type = this.schema[key];
-    return value === undefined ? undefined : type(value);
-  }
-
-  async update(object) {
+  update(object) {
     return this.kvStore.batch(func => {
       lodash.map(this.schema, (type, key) => {
         const value = object[key];
@@ -36,6 +31,26 @@ class Schema {
         }
       });
     });
+  }
+
+  remove(fields) {
+    let keys = Object.keys(this.schema);
+    if (fields !== undefined) {
+      keys = lodash.intersection(keys, fields);
+    }
+
+    return this.kvStore.batch(func => {
+      keys.forEach(key => {
+        func(this.del(key));
+      });
+    });
+  }
+
+  // --------------------------------------------------------------------------
+  async get(key) {
+    const value = await this.kvStore.get(key);
+    const type = this.schema[key];
+    return value === undefined ? undefined : type(value);
   }
 
   async select(fields) {
@@ -52,19 +67,6 @@ class Schema {
       }
     }));
     return result;
-  }
-
-  async remove(fields) {
-    let keys = Object.keys(this.schema);
-    if (fields !== undefined) {
-      keys = lodash.intersection(keys, fields);
-    }
-
-    return this.kvStore.batch(func => {
-      keys.forEach(key => {
-        func(this.del(key));
-      });
-    });
   }
 }
 

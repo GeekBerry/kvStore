@@ -19,7 +19,7 @@ test('crud', async () => {
 });
 
 test('batch', async () => {
-  const dir = kvStore.Dir('Dir');
+  const dir = kvStore.Dir('Batch');
 
   await kvStore.batch(func => {
     func(dir.set('1', 'A'));
@@ -30,8 +30,31 @@ test('batch', async () => {
 
   const entries = await dir.entries({ start: '2', stop: '3' });
   expect(entries).toEqual([
-    { key: '/Dir:2', value: 'B', name: '2' },
-    { key: '/Dir:3', value: 'C', name: '3' },
+    { key: '/Batch:2', value: 'B', name: '2' },
+    { key: '/Batch:3', value: 'C', name: '3' },
+  ]);
+});
+
+test('batch nested', async () => {
+  const nested = kvStore.Dir('Nested');
+
+  const batch = kvStore.batch(func => {
+    func(nested.set('1', 'A'));
+    func(nested.set('2', 'B'));
+    func(nested.set('3', 'C'));
+    func(nested.set('4', 'D'));
+  });
+
+  await kvStore.batch(func => {
+    func(batch);
+    func(nested.del('2'));
+  });
+
+  const entries = await nested.entries();
+  expect(entries).toEqual([
+    { key: '/Nested:1', value: 'A', name: '1' },
+    { key: '/Nested:3', value: 'C', name: '3' },
+    { key: '/Nested:4', value: 'D', name: '4' },
   ]);
 });
 
