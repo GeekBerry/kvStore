@@ -37,7 +37,7 @@ class Json {
 
   async select(fields) {
     let object = await this.get();
-    if (fields !== undefined) {
+    if (object !== undefined && fields !== undefined) {
       object = lodash.pick(object, fields);
     }
     return object;

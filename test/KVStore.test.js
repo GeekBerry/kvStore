@@ -92,6 +92,7 @@ test('Json', async () => {
   const json = kvStore.Json('Json');
 
   expect(await json.get()).toEqual(undefined);
+  expect(await json.select([])).toEqual(undefined);
 
   await json.set({ A: 'a1', B: 'b1' });
   expect(await json.get()).toEqual({ A: 'a1', B: 'b1' });
@@ -99,6 +100,7 @@ test('Json', async () => {
   await json.update({ A: 'a2', C: 'c2' });
   expect(await json.get()).toEqual({ A: 'a2', B: 'b1', C: 'c2' });
 
+  expect(await json.select([])).toEqual({});
   expect(await json.select(['A', 'C'])).toEqual({ A: 'a2', C: 'c2' });
 
   await json.remove(['A']);
