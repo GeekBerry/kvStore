@@ -6,6 +6,7 @@ const Schema = require('./type/Schema');
 const IndexMap = require('./type/IndexMap');
 const IndexSet = require('./type/IndexSet');
 const Stack = require('./type/Stack');
+const HashSet = require('./type/HashSet');
 
 /**
  * {string:string}
@@ -123,6 +124,12 @@ class KVStore {
     return new Schema(this, name, schema);
   }
 
+  // --------------------------------------------------------------------------
+  HashSet(name) {
+    return new HashSet(this, name);
+  }
+
+  // --------------------------------------------------------------------------
   IndexMap(name) {
     return new IndexMap(this, name);
   }

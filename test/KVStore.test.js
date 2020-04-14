@@ -149,6 +149,31 @@ test('Schema', async () => {
   expect(await schema.select()).toEqual({});
 });
 
+test('HashSet', async () => {
+  const hashSet = kvStore.HashSet('HashSet');
+
+  expect(await hashSet.get('A')).toEqual(undefined);
+  await hashSet.set('A');
+  expect(await hashSet.get('A')).toEqual(true);
+  await hashSet.del('A');
+  expect(await hashSet.get('A')).toEqual(undefined);
+
+  expect(await hashSet.list()).toEqual([]);
+  await hashSet.set('X');
+  await hashSet.set('Y');
+  await hashSet.set('X');
+  await hashSet.set('Z');
+  await hashSet.set('M');
+  await hashSet.set('N');
+
+  expect(await hashSet.list()).toEqual(['M', 'N', 'X', 'Y', 'Z']);
+  expect(await hashSet.list({ start: 'N', stop: 'Y' })).toEqual(['N', 'X', 'Y']);
+  expect(await hashSet.list({ reverse: true, limit: 3 })).toEqual(['Z', 'Y', 'X']);
+
+  await hashSet.clear();
+  expect(await hashSet.list()).toEqual([]);
+});
+
 test('IndexMap', async () => {
   const IndexMap = kvStore.IndexMap('IndexMap');
   await IndexMap.set(1, 'A');
