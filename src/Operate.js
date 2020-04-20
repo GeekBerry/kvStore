@@ -15,7 +15,7 @@ class SetOperate extends Operate {
   async then(resolve, reject) {
     try {
       const { key, value } = this.object;
-      resolve(await this.database.set(key, value));
+      resolve(await this.database.put(key, value));
     } catch (e) {
       reject(e);
     }

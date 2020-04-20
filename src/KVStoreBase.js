@@ -1,28 +1,20 @@
+const LevelInterface = require('@geekberry/leveldb/src/LevelInterface');
 const Operate = require('./Operate');
-const Integer = require('./type/Integer');
-const BigInteger = require('./type/BigInteger');
-const Json = require('./type/Json');
-const Schema = require('./type/Schema');
-const IndexMap = require('./type/IndexMap');
-const IndexSet = require('./type/IndexSet');
-const Stack = require('./type/Stack');
-const HashSet = require('./type/HashSet');
 
 /**
  * {string:string}
  */
-class KVStore {
+class KVStoreBase {
   /**
-   * @param database {object|KVStore}
-   * @param [path=''] {string}
+   * @param database {LevelInterface}
+   * @param [path=''] {string} - prefix
    */
   constructor(database, path = '') {
-    if (database instanceof KVStore) {
-      this.database = database.database; // use parent database
-    } else {
-      this.database = database;
+    if (!(database instanceof LevelInterface)) {
+      throw new Error('database must be instance of LevelInterface');
     }
 
+    this.database = database;
     this.path = path;
   }
 
@@ -102,45 +94,6 @@ class KVStore {
 
     return array;
   }
-
-  // --------------------------------------------------------------------------
-  Dir(path) {
-    return new KVStore(this, `${this.path}/${path}`);
-  }
-
-  Integer(name) {
-    return new Integer(this, name);
-  }
-
-  BigInteger(name) {
-    return new BigInteger(this, name);
-  }
-
-  Json(name) {
-    return new Json(this, name);
-  }
-
-  Schema(name, schema) {
-    return new Schema(this, name, schema);
-  }
-
-  // --------------------------------------------------------------------------
-  HashSet(name) {
-    return new HashSet(this, name);
-  }
-
-  // --------------------------------------------------------------------------
-  IndexMap(name) {
-    return new IndexMap(this, name);
-  }
-
-  IndexSet(name) {
-    return new IndexSet(this, name);
-  }
-
-  Stack(name) {
-    return new Stack(this, name);
-  }
 }
 
-module.exports = KVStore;
+module.exports = KVStoreBase;
