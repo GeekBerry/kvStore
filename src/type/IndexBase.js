@@ -9,10 +9,6 @@ class IndexBase {
     this.name = name;
   }
 
-  get fullName() {
-    return this.kvStore.path.slice(1); // skip prefix '/'
-  }
-
   _formatIndex(index) {
     if (!Number.isSafeInteger(index) || !(index >= 0)) {
       throw new Error(`Invalid index ${index}`);

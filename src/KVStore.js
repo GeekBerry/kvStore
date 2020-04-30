@@ -11,11 +11,18 @@ class KVStore extends KVStoreDir {
     this.options = options;
   }
 
-  async listen() {
+  /*
+   * @param options {object}
+   * @param options.readOnly {boolean}
+   * @param options.host {string}
+   * @param options.port {number}
+   */
+  async listen(options = {}) {
     if (this.server) {
       await this.server.close();
     }
-    this.server = new LevelDB.Server({ ...this.options, database: this.database });
+
+    this.server = new LevelDB.Server({ ...options, database: this.database });
   }
 
   async clear() {
