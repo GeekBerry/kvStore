@@ -58,6 +58,21 @@ test('batch nested', async () => {
   ]);
 });
 
+test('Dir', async () => {
+  const dir = kvStore.Dir('dir');
+
+  await kvStore.set('A', 'outer');
+  await dir.set('A', 'inner');
+
+  expect(await kvStore.get('A')).toEqual('outer');
+  expect(await dir.get('A')).toEqual('inner');
+
+  await dir.remove();
+
+  expect(await kvStore.get('A')).toEqual('outer');
+  expect(await dir.get('A')).toEqual(undefined);
+});
+
 test('Integer', async () => {
   const integer = kvStore.Integer('Integer');
 

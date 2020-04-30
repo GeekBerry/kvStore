@@ -18,6 +18,10 @@ class KVStore extends KVStoreDir {
     this.server = new LevelDB.Server({ ...this.options, database: this.database });
   }
 
+  async clear() {
+    await this.database.clear();
+  }
+
   async close() {
     await this.database.close();
     if (this.server) {
