@@ -197,19 +197,19 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@geekberry/buffer-socket@0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@geekberry/buffer-socket/-/buffer-socket-0.0.2.tgz#af913e85c5b1fe6715b5ccd994110df9f519fc5d"
-  integrity sha512-OmynaVe0Mns+3RJXQ3VQg8J8fFcgfEcJ6M6KZJzVgQ/ob2NJSJZDeWHFo+RKVXy2XtE0PHOsbGn0CKw0Ex0ILw==
+"@geekberry/buffer-socket@~0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@geekberry/buffer-socket/-/buffer-socket-0.0.5.tgz#d03a4eff25ab197b5e1ba61defb547246caaf2e1"
+  integrity sha512-lTWybqKfRo6lPvcs1N/h0DqmfQWBjqxWcm/Yg2GaSKD9fRbnqeipx6WXYvpGioB+AFCbOczTgSFLZQqhuM6VZA==
   dependencies:
     ws "^7.2.3"
 
-"@geekberry/leveldb@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@geekberry/leveldb/-/leveldb-0.2.0.tgz#f853da3821bd935b0a0129320997acab5146fad3"
-  integrity sha512-XY41Pmq3JuZd5r8TcwFu4cMHQSHcbK8HPecYMma7SHZT5hLlBVJrtBalvLBDlQgE9vD4t9Hnh6o2oa3ekrBmjQ==
+"@geekberry/leveldb@~0.2.3":
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/@geekberry/leveldb/-/leveldb-0.2.3.tgz#b19aeaa0a7df71aaaabfd551030770760d71695c"
+  integrity sha512-/dsV/4jOsOQvXD8N0pSRLs77LEbdo2GfceaIh9Y1shDQ09lZfEyM5ThSjjoewxrVKkBkRRVvTMx4xRWnVvEiQw==
   dependencies:
-    "@geekberry/buffer-socket" "0.0.2"
+    "@geekberry/buffer-socket" "~0.0.5"
     leveldown "^5.6.0"
 
 "@jest/console@^24.7.1", "@jest/console@^24.9.0":

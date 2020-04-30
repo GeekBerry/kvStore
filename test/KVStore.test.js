@@ -41,6 +41,6 @@ test('crud', async () => {
 
 afterAll(async () => {
   await server.close();
-  // await writer.close();
-  // await reader.close();
+  await writer.close();
+  await reader.close();
 });

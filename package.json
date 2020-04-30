@@ -10,7 +10,7 @@
     "index.js"
   ],
   "dependencies": {
-    "@geekberry/leveldb": "^0.2.0",
+    "@geekberry/leveldb": "~0.2.3",
     "lodash": "^4.17.15"
   },
   "devDependencies": {
