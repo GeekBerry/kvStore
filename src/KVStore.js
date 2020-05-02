@@ -8,7 +8,6 @@ class KVStore extends KVStoreDir {
     } else {
       super(new LevelDB.Client(options), path);
     }
-    this.options = options;
   }
 
   /*
