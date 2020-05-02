@@ -9,7 +9,6 @@ const database1 = new KVStore({
 const database2 = new KVStore({
   LevelUp: LevelParty,
   location: './DATA/LEVEL_PARTY',
-  readOnly: true,
 });
 
 // ----------------------------------------------------------------------------

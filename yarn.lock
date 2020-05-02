@@ -204,10 +204,10 @@
   dependencies:
     ws "^7.2.3"
 
-"@geekberry/leveldb@0.2.5":
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/@geekberry/leveldb/-/leveldb-0.2.5.tgz#f4a44c4be610392de585e579c27902baeac85c43"
-  integrity sha512-MFJY+Bvismik59ybRPGB6zgVtswMHVjdVKNp49OOrlFI/6hNdB8o3oTeNeLk0wS3kmpjjhaTxzUKIVQccDj41Q==
+"@geekberry/leveldb@0.2.6":
+  version "0.2.6"
+  resolved "https://registry.yarnpkg.com/@geekberry/leveldb/-/leveldb-0.2.6.tgz#6248c94ec2d5bbbb4d69f3362eb8e18c08733d9e"
+  integrity sha512-yY8WzQPQtaIz4/Ek8x6iU3ogHVdfcy66l5/HMyfMA4bcn3XPANhN7BKRdr4vIWp8oLMcqXw8QgBXtN3Iu8IeZw==
   dependencies:
     "@geekberry/buffer-socket" "~0.0.5"
     leveldown "^5.6.0"
