@@ -1,11 +1,11 @@
-const IndexBase = require('./IndexBase');
+const TupleMap = require('./TupleMap');
 
 /**
  * [int:string, ...]
  */
-class Stack extends IndexBase {
-  constructor(kvStore, name) {
-    super(kvStore, name);
+class Stack extends TupleMap {
+  constructor(kvStore) {
+    super(kvStore, Number, String);
 
     this.sizeInteger = this.kvStore.Integer('length');
   }
@@ -29,12 +29,12 @@ class Stack extends IndexBase {
   async push(...args) {
     let size = await this.size();
 
-    await this.kvStore.batch(func => {
+    await this.kvStore.batch(chain => {
       args.forEach(value => {
-        func(this.kvStore.set(this._formatIndex(size), value));
+        chain(this.set(size, value));
         size += 1;
       });
-      func(this.sizeInteger.set(size));
+      chain(this.sizeInteger.set(size));
     });
 
     return size;
@@ -43,14 +43,14 @@ class Stack extends IndexBase {
   async pop(count = 1) {
     let size = await this.size();
 
-    const entries = await this.entries({ reverse: true, limit: count, stop: size });
+    const entries = await this.entries({ reverse: true, limit: count, start: 0, stop: size });
 
-    await this.kvStore.batch(func => {
+    await this.kvStore.batch(chain => {
       entries.forEach(({ key }) => {
-        func(this.kvStore.del(key));
+        chain(this.del(key));
         size -= 1;
       });
-      func(this.sizeInteger.set(size));
+      chain(this.sizeInteger.set(size));
     });
 
     return entries.map(v => v.value);

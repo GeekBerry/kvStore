@@ -36,8 +36,8 @@ class KVStoreBase {
 
     if (limit === Infinity) {
       options.limit = -1;
-    } else if (Number.isInteger(limit) && limit >= 0) {
-      options.limit = limit;
+    } else if (Number.isInteger(limit)) {
+      options.limit = limit >= 0 ? limit : 0;
     } else {
       throw new Error(`Invalid limit ${limit}`);
     }
@@ -97,8 +97,8 @@ class KVStoreBase {
   }
 
   // --------------------------------------------------------------------------
-  Dir(path) {
-    return new this.constructor(this.database, `${this.path}/${path}`);
+  Dir(name) {
+    return new this.constructor(this.database, `${this.path}/${name}`);
   }
 }
 

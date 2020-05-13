@@ -202,13 +202,18 @@ test('IndexMap', async () => {
   await IndexMap.set(6, 'F1');
   await IndexMap.set(9, 'I');
 
+  expect(await IndexMap.keys()).toEqual([1, 2, 3, 5, 6, 9]);
+
   const list = await IndexMap.entries({ start: 2, stop: 6 });
   expect(list).toEqual([
-    { path: '/IndexMap:0000000000002', key: '0000000000002', value: '' },
-    { path: '/IndexMap:0000000000003', key: '0000000000003', value: 'C' },
-    { path: '/IndexMap:0000000000005', key: '0000000000005', value: 'E' },
-    { path: '/IndexMap:0000000000006', key: '0000000000006', value: 'F1' },
+    { key: 2, value: '', path: '/IndexMap:0x00000000000002', _key: '0x00000000000002', _value: '' },
+    { key: 3, value: 'C', path: '/IndexMap:0x00000000000003', _key: '0x00000000000003', _value: 'C' },
+    { key: 5, value: 'E', path: '/IndexMap:0x00000000000005', _key: '0x00000000000005', _value: 'E' },
+    { key: 6, value: 'F1', path: '/IndexMap:0x00000000000006', _key: '0x00000000000006', _value: 'F1' },
   ]);
+
+  await IndexMap.remove({ start: 2, stop: 6 });
+  expect(await IndexMap.keys()).toEqual([1, 9]);
 });
 
 test('IndexSet', async () => {
@@ -226,11 +231,11 @@ test('IndexSet', async () => {
 
   const list = await indexSet.entries({ start: 2, stop: 6 });
   expect(list).toEqual([
-    { path: '/IndexSet:0000000000002,', key: '0000000000002', value: '' },
-    { path: '/IndexSet:0000000000003,C', key: '0000000000003', value: 'C' },
-    { path: '/IndexSet:0000000000005,E', key: '0000000000005', value: 'E' },
-    { path: '/IndexSet:0000000000006,F', key: '0000000000006', value: 'F' },
-    { path: '/IndexSet:0000000000006,F1', key: '0000000000006', value: 'F1' },
+    { path: '/IndexSet:0x00000000000002,', key: 2, value: '' },
+    { path: '/IndexSet:0x00000000000003,C', key: 3, value: 'C' },
+    { path: '/IndexSet:0x00000000000005,E', key: 5, value: 'E' },
+    { path: '/IndexSet:0x00000000000006,F', key: 6, value: 'F' },
+    { path: '/IndexSet:0x00000000000006,F1', key: 6, value: 'F1' },
   ]);
 });
 
@@ -264,7 +269,7 @@ test('Stack', async () => {
 });
 
 test('TupleMap', async () => {
-  const tupleMap = kvStore.TupleMap('TupleMap', Number, String);
+  const tupleMap = kvStore.TupleMap('TupleMapTable', Number, String);
 
   await tupleMap.set(1, 'A');
   await tupleMap.set(5, 'B');
@@ -276,30 +281,44 @@ test('TupleMap', async () => {
   });
 
   expect(await tupleMap.entries()).toEqual([
-    { key: 1, value: 'A', path: '/TupleMap:0x00000000000001', _key: '0x00000000000001', _value: 'A' },
-    { key: 5, value: 'C', path: '/TupleMap:0x00000000000005', _key: '0x00000000000005', _value: 'C' },
-    { key: 8, value: 'D', path: '/TupleMap:0x00000000000008', _key: '0x00000000000008', _value: 'D' },
+    { key: 1, value: 'A', path: '/TupleMapTable:0x00000000000001', _key: '0x00000000000001', _value: 'A' },
+    { key: 5, value: 'C', path: '/TupleMapTable:0x00000000000005', _key: '0x00000000000005', _value: 'C' },
+    { key: 8, value: 'D', path: '/TupleMapTable:0x00000000000008', _key: '0x00000000000008', _value: 'D' },
   ]);
 
   expect(await tupleMap.get(5)).toEqual('C');
 });
 
-test('TupleMap popTail', async () => {
+test('TupleMap remove', async () => {
   const tupleMap = kvStore.TupleMap('TupleMapSet', [Number, Number], null);
 
-  await tupleMap.set([100, 2]);
-  await tupleMap.set([100, 3]);
-  await tupleMap.set([500, 1]);
-  await tupleMap.set([500, 4]);
+  for (let i = 1; i <= 4; i += 1) {
+    for (let j = 1; j <= 4; j += 1) {
+      await tupleMap.set([i, j]);
+    }
+  }
 
-  const before = (await tupleMap.entries()).map(entry => entry.key);
-  expect(before).toEqual([[100, 2], [100, 3], [500, 1], [500, 4]]);
+  const entries = await tupleMap.remove({
+    start: [2, 2],
+    stop: [3, 3],
+    reverse: true,
+  });
 
-  const poped = (await tupleMap.popTail([100, 3])).map(entry => entry.key);
-  expect(poped).toEqual([[500, 4], [100, 3]]);
+  expect(entries).toEqual([
+    { key: [3, 3], value: null, path: '/TupleMapSet:0x00000000000003,0x00000000000003', _key: '0x00000000000003,0x00000000000003', _value: '' },
+    { key: [3, 2], value: null, path: '/TupleMapSet:0x00000000000003,0x00000000000002', _key: '0x00000000000003,0x00000000000002', _value: '' },
+    { key: [2, 3], value: null, path: '/TupleMapSet:0x00000000000002,0x00000000000003', _key: '0x00000000000002,0x00000000000003', _value: '' },
+    { key: [2, 2], value: null, path: '/TupleMapSet:0x00000000000002,0x00000000000002', _key: '0x00000000000002,0x00000000000002', _value: '' },
+  ]);
 
-  const after = (await tupleMap.entries()).map(entry => entry.key);
-  expect(after).toEqual([[100, 2], [500, 1]]);
+  expect(await tupleMap.keys()).toEqual([
+    [1, 1], [1, 2],
+    [1, 3], [1, 4],
+    [2, 1], [2, 4],
+    [3, 1], [3, 4],
+    [4, 1], [4, 2],
+    [4, 3], [4, 4],
+  ]);
 });
 
 afterAll(async () => {
