@@ -4,8 +4,8 @@ const lodash = require('lodash');
  * {string:object}
  */
 class Json {
-  constructor(kvStore, name) {
-    this.kvStore = kvStore.Dir(name);
+  constructor(kvStore) {
+    this.kvStore = kvStore;
   }
 
   set(object) {

@@ -2,8 +2,8 @@
  * {string:object}
  */
 class HashSet {
-  constructor(kvStore, name) {
-    this.kvStore = kvStore.Dir(name);
+  constructor(kvStore) {
+    this.kvStore = kvStore;
   }
 
   set(key) {

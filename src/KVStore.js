@@ -8,6 +8,7 @@ const IndexMap = require('./type/IndexMap');
 const IndexSet = require('./type/IndexSet');
 const Stack = require('./type/Stack');
 const HashSet = require('./type/HashSet');
+const TupleMap = require('./type/TupleMap');
 
 class KVStore extends KVStoreBase {
   constructor(options, path) {
@@ -47,37 +48,41 @@ class KVStore extends KVStoreBase {
 
   // ==========================================================================
   Integer(name) {
-    return new Integer(this, name);
+    return new Integer(this.Dir(name));
   }
 
   BigInteger(name) {
-    return new BigInteger(this, name);
+    return new BigInteger(this.Dir(name));
   }
 
   Json(name) {
-    return new Json(this, name);
+    return new Json(this.Dir(name));
   }
 
   Schema(name, schema) {
-    return new Schema(this, name, schema);
+    return new Schema(this.Dir(name), schema);
   }
 
   // --------------------------------------------------------------------------
   HashSet(name) {
-    return new HashSet(this, name);
+    return new HashSet(this.Dir(name));
   }
 
   // --------------------------------------------------------------------------
   IndexMap(name) {
-    return new IndexMap(this, name);
+    return new IndexMap(this.Dir(name));
   }
 
   IndexSet(name) {
-    return new IndexSet(this, name);
+    return new IndexSet(this.Dir(name));
   }
 
   Stack(name) {
-    return new Stack(this, name);
+    return new Stack(this.Dir(name));
+  }
+
+  TupleMap(name, ...args) {
+    return new TupleMap(this.Dir(name), ...args);
   }
 }
 

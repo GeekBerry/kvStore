@@ -1,14 +1,14 @@
 const lodash = require('lodash');
 
 class Schema {
-  constructor(kvStore, name, schema) {
+  constructor(kvStore, schema) {
     if (!lodash.isPlainObject(schema)
       || !(Object.keys(schema).length > 0)
       || !lodash.every(schema, func => lodash.isFunction(func))) {
       throw new Error(`schema must be non empty func object, got ${schema}`);
     }
 
-    this.kvStore = kvStore.Dir(name);
+    this.kvStore = kvStore;
     this.schema = schema;
   }
 

@@ -6,9 +6,8 @@ BigInt.prototype.toJSON = function () {
 };
 
 class BigInteger {
-  constructor(kvStore, name) {
-    this.kvStore = kvStore.Dir(name);
-    this.name = name;
+  constructor(kvStore) {
+    this.kvStore = kvStore;
   }
 
   set(value, delIfZero = true) {

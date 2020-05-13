@@ -263,6 +263,45 @@ test('Stack', async () => {
   expect(await stack.size()).toEqual(0);
 });
 
+test('TupleMap', async () => {
+  const tupleMap = kvStore.TupleMap('TupleMap', Number, String);
+
+  await tupleMap.set(1, 'A');
+  await tupleMap.set(5, 'B');
+  expect(() => tupleMap.set([1, 5], 'X')).toThrow('int must be safe integer, got "1,5"');
+
+  await tupleMap.kvStore.batch(chain => {
+    chain(tupleMap.set(8, 'D'));
+    chain(tupleMap.set(5, 'C'));
+  });
+
+  expect(await tupleMap.entries()).toEqual([
+    { key: 1, value: 'A', path: '/TupleMap:0x00000000000001', _key: '0x00000000000001', _value: 'A' },
+    { key: 5, value: 'C', path: '/TupleMap:0x00000000000005', _key: '0x00000000000005', _value: 'C' },
+    { key: 8, value: 'D', path: '/TupleMap:0x00000000000008', _key: '0x00000000000008', _value: 'D' },
+  ]);
+
+  expect(await tupleMap.get(5)).toEqual('C');
+});
+
+test('TupleMap popTail', async () => {
+  const tupleMap = kvStore.TupleMap('TupleMapSet', [Number, Number], null);
+
+  await tupleMap.set([100, 2]);
+  await tupleMap.set([100, 3]);
+  await tupleMap.set([500, 1]);
+  await tupleMap.set([500, 4]);
+
+  const before = (await tupleMap.entries()).map(entry => entry.key);
+  expect(before).toEqual([[100, 2], [100, 3], [500, 1], [500, 4]]);
+
+  const poped = (await tupleMap.popTail([100, 3])).map(entry => entry.key);
+  expect(poped).toEqual([[500, 4], [100, 3]]);
+
+  const after = (await tupleMap.entries()).map(entry => entry.key);
+  expect(after).toEqual([[100, 2], [500, 1]]);
+});
+
 afterAll(async () => {
   await kvStore.database.close();
 });
