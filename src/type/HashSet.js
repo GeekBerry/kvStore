@@ -21,7 +21,7 @@ class HashSet {
 
   async list(options) {
     const entries = await this.kvStore.entries(options);
-    return entries.map(v => v.name);
+    return entries.map(v => v.key);
   }
 
   async clear() {

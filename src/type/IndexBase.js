@@ -51,7 +51,7 @@ class IndexBase {
 
   async keys(options) {
     const entries = await this.entries(options);
-    return entries.map(v => this._parseIndex(v.name));
+    return entries.map(v => this._parseIndex(v.key));
   }
 
   async clear() {

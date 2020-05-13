@@ -58,12 +58,12 @@ class KVStoreBase {
   }
 
   // --------------------------------------------------------------------------
-  set(name, value) {
-    return new Operate.Set(this.database, this._formatName(name), value);
+  set(key, value) {
+    return new Operate.Set(this.database, this._formatName(key), value);
   }
 
-  del(name) {
-    return new Operate.Del(this.database, this._formatName(name));
+  del(key) {
+    return new Operate.Del(this.database, this._formatName(key));
   }
 
   batch(func) {
@@ -72,27 +72,33 @@ class KVStoreBase {
     return batchOperate;
   }
 
-  async remove(options = {}) {
+  remove(options = {}) {
     return this.database.clear(this._filter(options));
   }
 
   // --------------------------------------------------------------------------
   /**
-   * @param name {string}
+   * @param key {string}
    * @return {Promise<undefined|string>}
    */
-  async get(name) {
-    return this.database.get(this._formatName(name));
+  async get(key) {
+    return this.database.get(this._formatName(key));
   }
 
   async entries(options = {}) {
     const array = await this.database.list(this._filter(options));
 
     array.forEach(data => {
-      data.name = this._parseName(data.key);
+      data.path = data.key;
+      data.key = this._parseName(data.key);
     });
 
     return array;
+  }
+
+  // --------------------------------------------------------------------------
+  Dir(path) {
+    return new this.constructor(this.database, `${this.path}/${path}`);
   }
 }
 

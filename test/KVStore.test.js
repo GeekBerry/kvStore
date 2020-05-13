@@ -28,8 +28,8 @@ test('batch', async () => {
 
   const entries = await dir.entries({ start: '2', stop: '3' });
   expect(entries).toEqual([
-    { key: '/Batch:2', value: 'B', name: '2' },
-    { key: '/Batch:3', value: 'C', name: '3' },
+    { path: '/Batch:2', key: '2', value: 'B' },
+    { path: '/Batch:3', key: '3', value: 'C' },
   ]);
 });
 
@@ -50,9 +50,9 @@ test('batch nested', async () => {
 
   const entries = await nested.entries();
   expect(entries).toEqual([
-    { key: '/Nested:1', value: 'A', name: '1' },
-    { key: '/Nested:3', value: 'C', name: '3' },
-    { key: '/Nested:4', value: 'D', name: '4' },
+    { path: '/Nested:1', key: '1', value: 'A' },
+    { path: '/Nested:3', key: '3', value: 'C' },
+    { path: '/Nested:4', key: '4', value: 'D' },
   ]);
 });
 
@@ -204,10 +204,10 @@ test('IndexMap', async () => {
 
   const list = await IndexMap.entries({ start: 2, stop: 6 });
   expect(list).toEqual([
-    { key: '/IndexMap:0000000000002', value: '', name: '0000000000002' },
-    { key: '/IndexMap:0000000000003', value: 'C', name: '0000000000003' },
-    { key: '/IndexMap:0000000000005', value: 'E', name: '0000000000005' },
-    { key: '/IndexMap:0000000000006', value: 'F1', name: '0000000000006' },
+    { path: '/IndexMap:0000000000002', key: '0000000000002', value: '' },
+    { path: '/IndexMap:0000000000003', key: '0000000000003', value: 'C' },
+    { path: '/IndexMap:0000000000005', key: '0000000000005', value: 'E' },
+    { path: '/IndexMap:0000000000006', key: '0000000000006', value: 'F1' },
   ]);
 });
 
@@ -226,11 +226,11 @@ test('IndexSet', async () => {
 
   const list = await indexSet.entries({ start: 2, stop: 6 });
   expect(list).toEqual([
-    { key: '/IndexSet:0000000000002,', value: '', name: '0000000000002' },
-    { key: '/IndexSet:0000000000003,C', value: 'C', name: '0000000000003' },
-    { key: '/IndexSet:0000000000005,E', value: 'E', name: '0000000000005' },
-    { key: '/IndexSet:0000000000006,F', value: 'F', name: '0000000000006' },
-    { key: '/IndexSet:0000000000006,F1', value: 'F1', name: '0000000000006' },
+    { path: '/IndexSet:0000000000002,', key: '0000000000002', value: '' },
+    { path: '/IndexSet:0000000000003,C', key: '0000000000003', value: 'C' },
+    { path: '/IndexSet:0000000000005,E', key: '0000000000005', value: 'E' },
+    { path: '/IndexSet:0000000000006,F', key: '0000000000006', value: 'F' },
+    { path: '/IndexSet:0000000000006,F1', key: '0000000000006', value: 'F1' },
   ]);
 });
 

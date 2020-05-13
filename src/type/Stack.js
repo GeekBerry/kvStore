@@ -46,8 +46,8 @@ class Stack extends IndexBase {
     const entries = await this.entries({ reverse: true, limit: count, stop: size });
 
     await this.kvStore.batch(func => {
-      entries.forEach(({ name }) => {
-        func(this.kvStore.del(name));
+      entries.forEach(({ key }) => {
+        func(this.kvStore.del(key));
         size -= 1;
       });
       func(this.sizeInteger.set(size));

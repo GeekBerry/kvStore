@@ -22,11 +22,11 @@ class IndexSet extends IndexBase {
     }
   }
 
-  _parse({ key, name }) {
+  _parse({ path, key }) {
     return {
-      key,
-      name: name.slice(0, IndexBase.INDEX_SIZE),
-      value: name.slice(1 + IndexBase.INDEX_SIZE),
+      path,
+      key: key.slice(0, IndexBase.INDEX_SIZE),
+      value: key.slice(1 + IndexBase.INDEX_SIZE),
     };
   }
 
