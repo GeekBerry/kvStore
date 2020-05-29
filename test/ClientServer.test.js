@@ -27,8 +27,8 @@ test('crud', async () => {
   expect(await reader.get('key')).toEqual(undefined);
 
   await writer.set('key', 'value');
-  expect(await writer.get('key')).toEqual('value');
-  expect(await reader.get('key')).toEqual('value');
+  expect(await writer.get('key')).toEqual(Buffer.from('value'));
+  expect(await reader.get('key')).toEqual(Buffer.from('value'));
 
   await writer.del('key');
   expect(await reader.get('key')).toEqual(undefined);

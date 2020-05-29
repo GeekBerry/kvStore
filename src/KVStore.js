@@ -1,24 +1,24 @@
+const assert = require('assert');
+const crypto = require('crypto');
 const LevelDB = require('@geekberry/leveldb');
-const KVStoreBase = require('./KVStoreBase');
-const Integer = require('./type/Integer');
-const BigInteger = require('./type/BigInteger');
-const Json = require('./type/Json');
-const Schema = require('./type/Schema');
-const IndexMap = require('./type/IndexMap');
-const IndexSet = require('./type/IndexSet');
-const Stack = require('./type/Stack');
-const HashSet = require('./type/HashSet');
-const TupleMap = require('./type/TupleMap');
+const Operate = require('./Operate');
+const Table = require('./Table');
 
-class KVStore extends KVStoreBase {
-  constructor(options, path) {
-    if (options instanceof LevelDB.Interface) {
-      super(options, path);
-    } else if (options.location) {
-      super(new LevelDB(options), path);
+class KVStore {
+  constructor(options = {}) {
+    this._hexToName = {};
+    this._nameToTable = {};
+
+    options.asBuffer = true;
+    if (options.location) {
+      this.database = new LevelDB(options);
     } else {
-      super(new LevelDB.Client(options), path);
+      this.database = new LevelDB.Client(options);
     }
+
+    this.get = (...args) => this.database.get(...args);
+    this.list = (...args) => this.database.list(...args);
+    this.clear = (...args) => this.database.clear(...args);
   }
 
   /*
@@ -35,10 +35,6 @@ class KVStore extends KVStoreBase {
     this.server = new LevelDB.Server({ ...options, database: this.database });
   }
 
-  async clear() {
-    await this.database.clear();
-  }
-
   async close() {
     await this.database.close();
     if (this.server) {
@@ -46,43 +42,53 @@ class KVStore extends KVStoreBase {
     }
   }
 
-  // ==========================================================================
-  Integer(name) {
-    return new Integer(this.Dir(name));
+  // --------------------------------------------------------------------------
+  set(key, value) {
+    return new Operate.Set(this.database, key, value);
   }
 
-  BigInteger(name) {
-    return new BigInteger(this.Dir(name));
+  del(key) {
+    return new Operate.Del(this.database, key);
   }
 
-  Json(name) {
-    return new Json(this.Dir(name));
-  }
-
-  Schema(name, schema) {
-    return new Schema(this.Dir(name), schema);
+  batch(func) {
+    const batchOperate = new Operate.Batch(this.database);
+    func(operate => batchOperate.push(operate));
+    return batchOperate;
   }
 
   // --------------------------------------------------------------------------
-  HashSet(name) {
-    return new HashSet(this.Dir(name));
+  /**
+   * @param name {string}
+   * @return {Buffer}
+   */
+  _allocHash(name) {
+    const hex = crypto.createHash('md5').update(name).digest('hex').slice(0, 4);
+
+    const value = this._hexToName[hex];
+    if (value !== undefined && value !== name) {
+      throw new Error(`create name "${name}" failed, already have name "${value}" which hash is "${hex}"`);
+    }
+    this._hexToName[hex] = name;
+
+    return Buffer.from(hex, 'hex');
   }
 
-  // --------------------------------------------------------------------------
-  IndexMap(name) {
-    return new IndexMap(this.Dir(name));
-  }
+  /**
+   * @param name {string}
+   * @param keySchema {*}
+   * @param valueSchema {*}
+   * @return {Table}
+   */
+  Table(name, keySchema, valueSchema) {
+    if (!Reflect.has(this._nameToTable, name)) {
+      this._nameToTable[name] = new Table(this, this._allocHash(name), keySchema, valueSchema);
+    }
 
-  IndexSet(name) {
-    return new IndexSet(this.Dir(name));
-  }
+    const table = this._nameToTable[name];
+    assert(table instanceof Table);
 
-  Stack(name) {
-    return new Stack(this.Dir(name));
-  }
-
-  TupleMap(name, ...args) {
-    return new TupleMap(this.Dir(name), ...args);
+    return table;
   }
 }
 

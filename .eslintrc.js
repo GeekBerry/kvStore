@@ -17,6 +17,7 @@ module.exports = {
   rules: {
     'arrow-parens': ['error', 'as-needed'],
     'class-methods-use-this': 0,
+    'max-classes-per-file': 0, //
     'max-len': 0, // for doc
     'no-await-in-loop': 0, // async for loop
     'no-else-return': 0, // for switch insert or update

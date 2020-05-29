@@ -11,10 +11,10 @@ async function main() {
 
   await kvStore.set('key', 'value');
   
-  await kvStore.get('key'); // value
+  await kvStore.get('key'); // Buffer.from('value')
 
   await kvStore.del('key');
 }
 ```
 
-[more example](https://github.com/GeekBerry/kvStore/blob/master/test/KVStore.test.js)
+[more example](https://github.com/GeekBerry/kvStore/blob/master/test/Table.test.js)
