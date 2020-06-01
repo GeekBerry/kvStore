@@ -8,7 +8,7 @@ beforeAll(async () => {
 });
 
 test('uintToString', async () => {
-  const table = await kvStore.Table('uintToString', 'uint', String);
+  const table = await kvStore.Binary('uintToString', 'uint', String);
 
   await table.set(1, 'A');
   await table.set(2, 'B');
@@ -27,7 +27,7 @@ test('uintToString', async () => {
 });
 
 test('tupleToJson', async () => {
-  const table = await kvStore.Table('tupleToJson', ['uint', 'uint'], JSON);
+  const table = await kvStore.Binary('tupleToJson', ['uint', 'uint'], JSON);
 
   await kvStore.batch(chain => {
     lodash.range(4).forEach(i => {

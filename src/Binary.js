@@ -10,7 +10,7 @@ function compare(func, one, other) {
   }
 }
 
-class Table {
+class Binary {
   constructor(kvStore, buffer, keySchema, valueSchema = null) {
     this.kvStore = kvStore;
     this.keyCoder = KeyCoder.from(buffer, keySchema);
@@ -37,7 +37,7 @@ class Table {
     return this.kvStore.del(keyBuffer);
   }
 
-  async remove(options) {
+  remove(options) {
     return this.kvStore.clear(this._filter(options));
   }
 
@@ -79,4 +79,4 @@ class Table {
   }
 }
 
-module.exports = Table;
+module.exports = Binary;

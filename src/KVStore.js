@@ -2,12 +2,13 @@ const assert = require('assert');
 const crypto = require('crypto');
 const LevelDB = require('@geekberry/leveldb');
 const Operate = require('./Operate');
-const Table = require('./Table');
+const Binary = require('./Binary');
+const Text = require('./Text');
 
 class KVStore {
   constructor(options = {}) {
     this._hexToName = {};
-    this._nameToTable = {};
+    this._nameToInstance = {};
 
     options.asBuffer = true;
     if (options.location) {
@@ -78,17 +79,30 @@ class KVStore {
    * @param name {string}
    * @param keySchema {*}
    * @param valueSchema {*}
-   * @return {Table}
+   * @return {Binary}
    */
-  Table(name, keySchema, valueSchema) {
-    if (!Reflect.has(this._nameToTable, name)) {
-      this._nameToTable[name] = new Table(this, this._allocHash(name), keySchema, valueSchema);
+  Binary(name, keySchema, valueSchema) {
+    if (!Reflect.has(this._nameToInstance, name)) {
+      this._nameToInstance[name] = new Binary(this, this._allocHash(name), keySchema, valueSchema);
     }
 
-    const table = this._nameToTable[name];
-    assert(table instanceof Table);
+    const instance = this._nameToInstance[name];
+    assert(instance instanceof Binary);
+    return instance;
+  }
 
-    return table;
+  /**
+   * @param name{string}
+   * @return {Text}
+   */
+  Text(name) {
+    if (!Reflect.has(this._nameToInstance, name)) {
+      this._nameToInstance[name] = new Text(this, this._allocHash(name));
+    }
+
+    const instance = this._nameToInstance[name];
+    assert(instance instanceof Text);
+    return instance;
   }
 }
 
