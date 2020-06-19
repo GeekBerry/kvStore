@@ -10,7 +10,7 @@ class ReadStream {
     assert(Number.isInteger(size), `size must be integer got "${size}"`);
 
     const buffer = this._buffer.slice(this._index, this._index + size);
-    this._index += size;
+    this._index += buffer.length;
     return buffer;
   }
 
@@ -37,6 +37,10 @@ class ReadStream {
 
   readHex(size) {
     return `0x${this.read(size).toString('hex')}`;
+  }
+
+  toBuffer() {
+    return this._buffer.slice(this._index);
   }
 }
 

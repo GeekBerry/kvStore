@@ -174,6 +174,7 @@ class TupleCoder extends StaticCoder {
 
   constructor(array) {
     super();
+    this.length = array.length;
     this.typeArray = array.map(value => {
       const type = StaticCoder.from(value);
       this.size += type.size;
@@ -188,8 +189,7 @@ class TupleCoder extends StaticCoder {
   }
 
   read(stream) {
-    const tuple = this.typeArray.map(type => type.read(stream));
-    return tuple.length > 1 ? tuple : tuple[0];
+    return this.typeArray.map(type => type.read(stream));
   }
 }
 

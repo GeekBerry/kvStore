@@ -83,6 +83,32 @@ test('tupleToJson', async () => {
   ]);
 });
 
+test('stringToString', async () => {
+  const table = await kvStore.Binary('stringToString', String, String);
+
+  await table.set('ab', 'v0');
+  await table.set('abb', 'v1');
+  await table.set('az', 'v2');
+  await table.set('ba', 'v3');
+
+  let list = await table.list();
+  list = list.map(({ key, value }) => ({ key, value }));
+  expect(list).toEqual([
+    { key: 'ab', value: 'v0' },
+    { key: 'abb', value: 'v1' },
+    { key: 'az', value: 'v2' },
+    { key: 'ba', value: 'v3' },
+  ]);
+
+  list = await table.list({ min: 'a', max: 'b' });
+  list = list.map(({ key, value }) => ({ key, value }));
+  expect(list).toEqual([
+    { key: 'ab', value: 'v0' },
+    { key: 'abb', value: 'v1' },
+    { key: 'az', value: 'v2' },
+  ]);
+});
+
 afterAll(async () => {
   await kvStore.close();
 });

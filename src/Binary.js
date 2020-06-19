@@ -17,14 +17,6 @@ class Binary {
     this.valueCoder = DynamicCoder.from(valueSchema);
   }
 
-  _filter({ min, max, limit = Infinity, ...rest } = {}) {
-    min = min === undefined ? this.keyCoder.MIN_KEY : this.keyCoder.encode(min);
-    max = max === undefined ? this.keyCoder.MAX_KEY : this.keyCoder.encode(max);
-    limit = limit === Infinity ? -1 : limit;
-
-    return { ...rest, gte: min, lte: max, limit };
-  }
-
   // --------------------------------------------------------------------------
   set(key, value) {
     const keyBuffer = this.keyCoder.encode(key);
@@ -38,7 +30,7 @@ class Binary {
   }
 
   remove(options) {
-    return this.kvStore.clear(this._filter(options));
+    return this.kvStore.clear(this.keyCoder.filter(options));
   }
 
   async removeInner(options) {
@@ -61,7 +53,7 @@ class Binary {
   }
 
   async list(options) {
-    const array = await this.kvStore.list(this._filter(options));
+    const array = await this.kvStore.list(this.keyCoder.filter(options));
 
     return array.map(each => ({
       path: each.key,

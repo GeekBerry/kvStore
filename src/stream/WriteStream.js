@@ -6,19 +6,22 @@ class WriteStream {
     this._index = 0;
   }
 
-  write(buffer) {
-    assert(Buffer.isBuffer(buffer), 'buffer must be Buffer');
+  write(value) {
+    assert(Buffer.isBuffer(value), 'value must be Buffer');
 
-    buffer.copy(this._buffer, this._index);
-    this._index += buffer.length;
+    value.copy(this._buffer, this._index);
+    this._index += value.length;
   }
 
-  writeNumber(number = 0) {
-    this._buffer.writeDoubleBE(number, this._index);
+  writeNumber(value = 0) {
+    assert(Number.isFinite(value), 'value must be finite Number');
+
+    this._buffer.writeDoubleBE(value, this._index);
     this._index += 8;
   }
 
   writeUInt(value = 0, size = 6) {
+    assert(Number.isInteger(value) || value === Infinity, 'value must be integer Number');
     if (value === Infinity) {
       value = 2 ** (size * 8) - 1;
     }
@@ -41,6 +44,8 @@ class WriteStream {
   }
 
   writeHex(hex = '', size) {
+    assert(typeof hex === 'string', 'hex must be string');
+
     const length = size * 2;
 
     hex = hex === Infinity ? ''.padEnd(length, 'f') : hex;
