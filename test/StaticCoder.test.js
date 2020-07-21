@@ -27,8 +27,10 @@ describe('UInt', () => {
 
     const buffer = coder.encode(1);
     expect(buffer.toString('hex')).toEqual('000000000001');
-
     expect(coder.decode(buffer)).toEqual(1);
+
+    expect(coder.encode(0).toString('hex')).toEqual('000000000000');
+    expect(coder.encode(Infinity).toString('hex')).toEqual('ffffffffffff');
   });
 
   test('uint64', () => {
@@ -37,8 +39,40 @@ describe('UInt', () => {
 
     const buffer = coder.encode(1);
     expect(buffer.toString('hex')).toEqual('0000000000000001');
-
     expect(coder.decode(buffer)).toEqual(BigInt(1));
+
+    expect(coder.encode(0).toString('hex')).toEqual('0000000000000000');
+    expect(coder.encode(Infinity).toString('hex')).toEqual('ffffffffffffffff');
+  });
+});
+
+describe('Int', () => {
+  test('int', () => {
+    const coder = StaticCoder.from('int');
+    expect(coder.size).toEqual(6);
+    expect(coder.offset).toEqual(2 ** (6 * 8 - 1));
+
+    const buffer = coder.encode(-1);
+    expect(buffer.toString('hex')).toEqual('7fffffffffff');
+    expect(coder.decode(buffer)).toEqual(-1);
+
+    expect(coder.encode(-Infinity).toString('hex')).toEqual('000000000000');
+    expect(coder.encode(0).toString('hex')).toEqual('800000000000');
+    expect(coder.encode(Infinity).toString('hex')).toEqual('ffffffffffff');
+  });
+
+  test('int64', () => {
+    const coder = StaticCoder.from('int64');
+    expect(coder.size).toEqual(8);
+    expect(coder.offset).toEqual(BigInt(1) << (BigInt(8 * 8 - 1))); // eslint-disable-line no-bitwise
+
+    const buffer = coder.encode(-1);
+    expect(buffer.toString('hex')).toEqual('7fffffffffffffff');
+    expect(coder.decode(buffer)).toEqual(BigInt(-1));
+
+    expect(coder.encode(-Infinity).toString('hex')).toEqual('0000000000000000');
+    expect(coder.encode(0).toString('hex')).toEqual('8000000000000000');
+    expect(coder.encode(Infinity).toString('hex')).toEqual('ffffffffffffffff');
   });
 });
 

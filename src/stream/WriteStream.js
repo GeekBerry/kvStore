@@ -21,20 +21,13 @@ class WriteStream {
   }
 
   writeUInt(value = 0, size = 6) {
-    assert(Number.isInteger(value) || value === Infinity, 'value must be integer Number');
-    if (value === Infinity) {
-      value = 2 ** (size * 8) - 1;
-    }
+    assert(Number.isInteger(value), 'value must be integer Number');
 
     this._buffer.writeUIntBE(value, this._index, size);
     this._index += size;
   }
 
   writeBigUInt(value = 0, size = 8) {
-    if (value === Infinity) {
-      value = (BigInt(1) << BigInt(8 * size)) - BigInt(1); // eslint-disable-line no-bitwise
-    }
-
     if (size === 8) {
       this._buffer.writeBigUInt64BE(BigInt(value), this._index);
       this._index += size;

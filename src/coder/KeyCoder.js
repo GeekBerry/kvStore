@@ -28,12 +28,22 @@ class KeyCoder {
   static from(prefix, schema) {
     assert(Buffer.isBuffer(prefix), 'prefix must be Buffer');
 
-    for (const KeyCoderType of [StaticKeyCoder, StaticDynamicKeyCoder, DynamicKeyCoder]) {
-      try {
-        return KeyCoderType.from(prefix, schema);
-      } catch (e) {
-        // pass
-      }
+    try {
+      return StaticKeyCoder.from(prefix, schema);
+    } catch (e) {
+      // pass
+    }
+
+    try {
+      return StaticDynamicKeyCoder.from(prefix, schema);
+    } catch (e) {
+      // pass
+    }
+
+    try {
+      return DynamicKeyCoder.from(prefix, schema);
+    } catch (e) {
+      // pass
     }
 
     throw new Error(`can not create coder ${prefix.toString('hex')} by schema ${schema}`);
@@ -117,7 +127,7 @@ class StaticDynamicKeyCoder extends StaticKeyCoder {
 
     if (max === Infinity) {
       filter.lt = incBuffer(this.MAX_KEY);
-    } else if (max[this.coder.length] === Infinity) {
+    } else if (max[this.coder.length] === Infinity) { // last max element is Infinity
       filter.lt = incBuffer(this.encode(max.slice(0, this.coder.length)));
     } else {
       filter.lte = this.encode(max);

@@ -4,10 +4,13 @@ const lodash = require('lodash');
 const ReadStream = require('../stream/ReadStream');
 const WriteStream = require('../stream/WriteStream');
 
+const MAX_INT_SIZE = 6;
+
 class StaticCoder {
   static from(schema) {
     const coder = NumberCoder.from(schema)
       || UIntCoder.from(schema)
+      || IntCoder.from(schema)
       || HexCoder.from(schema)
       || BufferCoder.from(schema)
       || TupleCoder.from(schema)
@@ -87,26 +90,68 @@ class UIntCoder extends StaticCoder {
     if (lodash.isString(schema)) {
       const [/* uint */, bits] = schema.match(/^uint([0-9]*)$/) || [];
       if (bits !== undefined) {
-        return new this(bits ? Number(bits) : undefined);
+        const size = bits === '' ? MAX_INT_SIZE : Math.ceil(Number(bits) / 8);
+        return new this(size);
       }
     }
     return undefined;
   }
 
-  constructor(bits = 48) {
-    super(Math.ceil(bits / 8));
+  constructor(size) {
+    super(size);
+    this.min = this.isBigInt() ? BigInt(0) : 0;
+    this.max = this.isBigInt() ? (BigInt(1) << BigInt(8 * size)) - BigInt(1) : 2 ** (8 * size) - 1; // eslint-disable-line no-bitwise
+  }
+
+  isBigInt() {
+    return this.size > MAX_INT_SIZE;
   }
 
   write(stream, value) {
-    return this.size <= 6
-      ? stream.writeUInt(value, this.size)
-      : stream.writeBigUInt(value, this.size);
+    if (value === Infinity) {
+      value = this.max;
+    }
+    return this.isBigInt() ? stream.writeBigUInt(value, this.size) : stream.writeUInt(value, this.size);
   }
 
   read(stream) {
-    return this.size <= 6
-      ? stream.readUInt(this.size)
-      : stream.readBigUInt(this.size);
+    return this.isBigInt() ? stream.readBigUInt(this.size) : stream.readUInt(this.size);
+  }
+}
+
+class IntCoder extends UIntCoder {
+  static from(schema) {
+    if (lodash.isString(schema)) {
+      const [/* int */, bits] = schema.match(/^int([0-9]*)$/) || [];
+      if (bits !== undefined) {
+        const size = bits === '' ? MAX_INT_SIZE : Math.ceil(Number(bits) / 8);
+        return new this(size);
+      }
+    }
+    return undefined;
+  }
+
+  constructor(size) {
+    super(size);
+    this.offset = this.isBigInt() ? BigInt(1) << (BigInt(size * 8 - 1)) : 2 ** (size * 8 - 1); // eslint-disable-line no-bitwise
+    this.min -= this.offset;
+    this.max -= this.offset;
+  }
+
+  write(stream, value) {
+    if (value === Infinity) {
+      value = this.max;
+    } else if (value === -Infinity) {
+      value = this.min;
+    } else if (this.isBigInt()) {
+      value = BigInt(value);
+    }
+    return super.write(stream, value + this.offset);
+  }
+
+  read(stream) {
+    const value = super.read(stream);
+    return (this.isBigInt() ? BigInt(value) : value) - this.offset;
   }
 }
 
