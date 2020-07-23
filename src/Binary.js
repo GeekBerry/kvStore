@@ -11,9 +11,9 @@ function compare(func, one, other) {
 }
 
 class Binary {
-  constructor(kvStore, buffer, keySchema, valueSchema = null) {
+  constructor(kvStore, prefixBuffer, keySchema, valueSchema = null) {
     this.kvStore = kvStore;
-    this.keyCoder = KeyCoder.from(buffer, keySchema);
+    this.keyCoder = KeyCoder.from(prefixBuffer, keySchema);
     this.valueCoder = DynamicCoder.from(valueSchema);
   }
 

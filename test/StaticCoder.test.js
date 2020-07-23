@@ -1,7 +1,7 @@
 const StaticCoder = require('../src/coder/StaticCoder');
 
 test('null', () => {
-  const coder = StaticCoder.from(null);
+  const coder = StaticCoder.from('null');
   expect(coder.size).toEqual(0);
 
   const buffer = coder.encode();
@@ -11,7 +11,7 @@ test('null', () => {
 });
 
 test('Number', () => {
-  const coder = StaticCoder.from(Number);
+  const coder = StaticCoder.from('number');
   expect(coder.size).toEqual(8);
 
   const buffer = coder.encode(Math.PI);

@@ -8,14 +8,14 @@ const MAX_INT_SIZE = 6;
 
 class StaticCoder {
   static from(schema) {
-    const coder = NumberCoder.from(schema)
+    const coder = NullCoder.from(schema)
+      || NumberCoder.from(schema)
       || UIntCoder.from(schema)
       || IntCoder.from(schema)
       || HexCoder.from(schema)
       || BufferCoder.from(schema)
       || TupleCoder.from(schema)
-      || SchemaCoder.from(schema)
-      || NullCoder.from(schema);
+      || SchemaCoder.from(schema);
 
     if (!coder) {
       throw new Error(`can not create coder by schema ${schema}`);
@@ -49,7 +49,7 @@ class StaticCoder {
 
 class NullCoder extends StaticCoder {
   static from(schema) {
-    if (schema === null) {
+    if (schema === 'null' || schema === null) {
       return new this();
     }
     return undefined;
@@ -66,7 +66,7 @@ class NullCoder extends StaticCoder {
 
 class NumberCoder extends StaticCoder {
   static from(schema) {
-    if (schema === Number) {
+    if (schema === 'number' || schema === Number) {
       return new this();
     }
     return undefined;

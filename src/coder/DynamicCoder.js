@@ -30,7 +30,7 @@ class DynamicCoder {
 
 class BufferCoder extends DynamicCoder {
   static from(schema) {
-    if (schema === Buffer) {
+    if (schema === 'buffer' || schema === Buffer) {
       return new this();
     }
     return undefined;
@@ -48,7 +48,7 @@ class BufferCoder extends DynamicCoder {
 
 class StringCoder extends BufferCoder {
   static from(schema) {
-    if (schema === String) {
+    if (schema === 'string' || schema === String) {
       return new this();
     }
     return undefined;
@@ -61,7 +61,7 @@ class StringCoder extends BufferCoder {
 
 class JsonCoder extends BufferCoder {
   static from(schema) {
-    if (schema === JSON) {
+    if (schema === 'json' || schema === JSON) {
       return new this();
     }
     return undefined;

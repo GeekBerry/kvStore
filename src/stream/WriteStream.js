@@ -13,21 +13,21 @@ class WriteStream {
     this._index += value.length;
   }
 
-  writeNumber(value = 0) {
+  writeNumber(value) {
     assert(Number.isFinite(value), 'value must be finite Number');
 
     this._buffer.writeDoubleBE(value, this._index);
     this._index += 8;
   }
 
-  writeUInt(value = 0, size = 6) {
+  writeUInt(value, size = 6) {
     assert(Number.isInteger(value), 'value must be integer Number');
 
     this._buffer.writeUIntBE(value, this._index, size);
     this._index += size;
   }
 
-  writeBigUInt(value = 0, size = 8) {
+  writeBigUInt(value, size = 8) {
     if (size === 8) {
       this._buffer.writeBigUInt64BE(BigInt(value), this._index);
       this._index += size;
@@ -36,7 +36,7 @@ class WriteStream {
     }
   }
 
-  writeHex(hex = '', size) {
+  writeHex(hex, size) {
     assert(typeof hex === 'string', 'hex must be string');
 
     const length = size * 2;

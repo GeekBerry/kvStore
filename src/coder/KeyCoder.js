@@ -25,32 +25,32 @@ function incBuffer(buffer) {
 
 // ============================================================================
 class KeyCoder {
-  static from(prefix, schema) {
-    assert(Buffer.isBuffer(prefix), 'prefix must be Buffer');
+  static from(prefixBuffer, schema) {
+    assert(Buffer.isBuffer(prefixBuffer), 'prefixBuffer must be Buffer');
 
     try {
-      return StaticKeyCoder.from(prefix, schema);
+      return StaticKeyCoder.from(prefixBuffer, schema);
     } catch (e) {
       // pass
     }
 
     try {
-      return StaticDynamicKeyCoder.from(prefix, schema);
+      return StaticDynamicKeyCoder.from(prefixBuffer, schema);
     } catch (e) {
       // pass
     }
 
     try {
-      return DynamicKeyCoder.from(prefix, schema);
+      return DynamicKeyCoder.from(prefixBuffer, schema);
     } catch (e) {
       // pass
     }
 
-    throw new Error(`can not create coder ${prefix.toString('hex')} by schema ${schema}`);
+    throw new Error(`can not create KeyCoder by schema ${schema}`);
   }
 
-  constructor(prefix) {
-    this.prefix = prefix;
+  constructor(prefixBuffer) {
+    this.prefixBuffer = prefixBuffer;
   }
 
   filter() {
@@ -67,24 +67,24 @@ class KeyCoder {
 
   decode(buffer) {
     const stream = new ReadStream(buffer);
-    const prefix = stream.read(this.prefix.length);
-    assert(prefix.equals(this.prefix), `read prefix "${prefix.toString('hex')}" !== "${this.prefix.toString('hex')}"`);
+    const prefixBuffer = stream.read(this.prefixBuffer.length);
+    assert(prefixBuffer.equals(this.prefixBuffer), `read prefixBuffer "${prefixBuffer.toString('hex')}" !== "${this.prefixBuffer.toString('hex')}"`);
     return this.read(stream);
   }
 }
 
 class StaticKeyCoder extends KeyCoder {
-  static from(prefix, schema) {
+  static from(prefixBuffer, schema) {
     const staticCoder = StaticCoder.from(schema);
 
-    return new this(prefix, staticCoder);
+    return new this(prefixBuffer, staticCoder);
   }
 
-  constructor(prefix, coder) {
-    super(prefix);
+  constructor(prefixBuffer, coder) {
+    super(prefixBuffer);
     this.coder = coder;
-    this.MIN_KEY = Buffer.concat([this.prefix, Buffer.alloc(this.coder.size)]);
-    this.MAX_KEY = Buffer.concat([this.prefix, Buffer.allocUnsafe(this.coder.size).fill(0xff)]);
+    this.MIN_KEY = Buffer.concat([this.prefixBuffer, Buffer.alloc(this.coder.size)]);
+    this.MAX_KEY = Buffer.concat([this.prefixBuffer, Buffer.allocUnsafe(this.coder.size).fill(0xff)]);
   }
 
   filter({ min, max, limit = Infinity, reverse = false, keys = true, values = true } = {}) {
@@ -100,23 +100,23 @@ class StaticKeyCoder extends KeyCoder {
   }
 
   encode(value) {
-    const stream = new WriteStream(this.prefix.length + this.coder.size);
-    stream.write(this.prefix);
+    const stream = new WriteStream(this.prefixBuffer.length + this.coder.size);
+    stream.write(this.prefixBuffer);
     this.coder.write(stream, value);
     return stream.toBuffer();
   }
 }
 
 class StaticDynamicKeyCoder extends StaticKeyCoder {
-  static from(prefix, tuple) {
+  static from(prefixBuffer, tuple) {
     assert(Array.isArray(tuple), 'tuple must be Array');
     const staticCoder = StaticCoder.from(lodash.initial(tuple));
     const dynamicCoder = DynamicCoder.from(lodash.last(tuple));
-    return new this(prefix, staticCoder, dynamicCoder);
+    return new this(prefixBuffer, staticCoder, dynamicCoder);
   }
 
-  constructor(prefix, staticCoder, dynamicCoder) {
-    super(prefix, staticCoder);
+  constructor(prefixBuffer, staticCoder, dynamicCoder) {
+    super(prefixBuffer, staticCoder);
     this.dynamicCoder = dynamicCoder;
   }
 
@@ -151,24 +151,24 @@ class StaticDynamicKeyCoder extends StaticKeyCoder {
 }
 
 class DynamicKeyCoder extends KeyCoder {
-  static from(prefix, schema) {
+  static from(prefixBuffer, schema) {
     const dynamicCoder = DynamicCoder.from(schema);
 
-    return new this(prefix, dynamicCoder);
+    return new this(prefixBuffer, dynamicCoder);
   }
 
-  constructor(prefix, dynamicCoder) {
-    super(prefix);
+  constructor(prefixBuffer, dynamicCoder) {
+    super(prefixBuffer);
     this.dynamicCoder = dynamicCoder;
   }
 
   filter({ min, max = Infinity, limit = Infinity, reverse = false, keys = true, values = true } = {}) {
     const filter = { reverse, keys, values };
     filter.limit = limit === Infinity ? -1 : limit;
-    filter.gte = min === undefined ? this.prefix : this.encode(min);
+    filter.gte = min === undefined ? this.prefixBuffer : this.encode(min);
 
     if (max === Infinity) {
-      filter.lt = incBuffer(this.prefix);
+      filter.lt = incBuffer(this.prefixBuffer);
     } else {
       filter.lte = this.encode(max);
     }
@@ -181,7 +181,7 @@ class DynamicKeyCoder extends KeyCoder {
   }
 
   encode(value) {
-    return Buffer.concat([this.prefix, this.dynamicCoder.encode(value)]);
+    return Buffer.concat([this.prefixBuffer, this.dynamicCoder.encode(value)]);
   }
 }
 
