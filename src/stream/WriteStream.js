@@ -13,26 +13,26 @@ class WriteStream {
     this._index += value.length;
   }
 
-  writeNumber(value) {
-    assert(Number.isFinite(value), 'value must be finite Number');
-
-    this._buffer.writeDoubleBE(value, this._index);
+  writeNumber(number) {
+    this._buffer.writeDoubleBE(number, this._index);
     this._index += 8;
   }
 
-  writeUInt(value, size = 6) {
-    assert(Number.isInteger(value), 'value must be integer Number');
+  writeUInt(int, size = 6) {
+    assert(Number.isInteger(int), 'int must be integer Number');
 
-    this._buffer.writeUIntBE(value, this._index, size);
+    this._buffer.writeUIntBE(int, this._index, size);
     this._index += size;
   }
 
-  writeBigUInt(value, size = 8) {
+  writeBigUInt(bigInt, size = 8) {
+    bigInt = BigInt(bigInt);
+
     if (size === 8) {
-      this._buffer.writeBigUInt64BE(BigInt(value), this._index);
+      this._buffer.writeBigUInt64BE(bigInt, this._index);
       this._index += size;
     } else {
-      this.writeHex(BigInt(value).toString(16), size);
+      this.writeHex(bigInt.toString(16), size);
     }
   }
 

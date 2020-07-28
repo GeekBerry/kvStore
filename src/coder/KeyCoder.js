@@ -35,7 +35,13 @@ class KeyCoder {
     }
 
     try {
-      return StaticDynamicKeyCoder.from(prefixBuffer, schema);
+      return StaticDynamicTupleKeyCoder.from(prefixBuffer, schema);
+    } catch (e) {
+      // pass
+    }
+
+    try {
+      return StaticDynamicObjectKeyCoder.from(prefixBuffer, schema);
     } catch (e) {
       // pass
     }
@@ -107,17 +113,23 @@ class StaticKeyCoder extends KeyCoder {
   }
 }
 
-class StaticDynamicKeyCoder extends StaticKeyCoder {
-  static from(prefixBuffer, tuple) {
-    assert(Array.isArray(tuple), 'tuple must be Array');
-    const staticCoder = StaticCoder.from(lodash.initial(tuple));
-    const dynamicCoder = DynamicCoder.from(lodash.last(tuple));
-    return new this(prefixBuffer, staticCoder, dynamicCoder);
+class StaticDynamicObjectKeyCoder extends StaticKeyCoder {
+  static from(prefixBuffer, schema) {
+    assert(lodash.isPlainObject(schema), 'schema must be object');
+
+    const keys = lodash.keys(schema);
+    const staticKeys = lodash.initial(keys);
+    const dynamicKey = lodash.last(keys);
+
+    const staticCoder = StaticCoder.from(lodash.pick(schema, staticKeys));
+    const dynamicCoder = DynamicCoder.from(schema[dynamicKey]);
+    return new this(prefixBuffer, staticCoder, dynamicCoder, dynamicKey);
   }
 
-  constructor(prefixBuffer, staticCoder, dynamicCoder) {
+  constructor(prefixBuffer, staticCoder, dynamicCoder, dynamicKey) {
     super(prefixBuffer, staticCoder);
     this.dynamicCoder = dynamicCoder;
+    this.dynamicKey = dynamicKey;
   }
 
   filter({ min, max = Infinity, limit = Infinity, reverse = false, keys = true, values = true } = {}) {
@@ -127,8 +139,8 @@ class StaticDynamicKeyCoder extends StaticKeyCoder {
 
     if (max === Infinity) {
       filter.lt = incBuffer(this.MAX_KEY);
-    } else if (max[this.coder.length] === Infinity) { // last max element is Infinity
-      filter.lt = incBuffer(this.encode(max.slice(0, this.coder.length)));
+    } else if (max[this.dynamicKey] === Infinity) { // last max element is Infinity
+      filter.lt = incBuffer(super.encode(max));
     } else {
       filter.lte = this.encode(max);
     }
@@ -139,14 +151,27 @@ class StaticDynamicKeyCoder extends StaticKeyCoder {
   read(stream) {
     const initial = super.read(stream);
     const last = this.dynamicCoder.decode(stream.toBuffer());
-    return [...initial, last];
+    return { ...initial, [this.dynamicKey]: last };
   }
 
-  encode(array) {
-    const staticBuffer = super.encode(array.slice(0, this.coder.length));
-    const dynamicBuffer = this.dynamicCoder.encode(array[this.coder.length]);
+  encode(value) {
+    const staticBuffer = super.encode(value);
+    const dynamicBuffer = this.dynamicCoder.encode(value[this.dynamicKey]);
 
     return Buffer.concat([staticBuffer, dynamicBuffer]);
+  }
+}
+
+class StaticDynamicTupleKeyCoder extends StaticDynamicObjectKeyCoder {
+  static from(prefixBuffer, tuple) {
+    assert(Array.isArray(tuple), 'tuple must be Array');
+    const schema = lodash.fromPairs(tuple.map((v, i) => ([i, v])));
+    return super.from(prefixBuffer, schema);
+  }
+
+  read(stream) {
+    const object = super.read(stream);
+    return lodash.values(object);
   }
 }
 

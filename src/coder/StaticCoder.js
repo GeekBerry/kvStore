@@ -27,6 +27,14 @@ class StaticCoder {
     this.size = size;
   }
 
+  get minBuffer() {
+    return Buffer.alloc(this.size);
+  }
+
+  get maxBuffer() {
+    return Buffer.allocUnsafe(this.size).fill(0xff);
+  }
+
   write() {
     throw new Error(`NotImplementError: ${this.constructor.name}.write not implement`);
   }
@@ -97,19 +105,13 @@ class UIntCoder extends StaticCoder {
     return undefined;
   }
 
-  constructor(size) {
-    super(size);
-    this.min = this.isBigInt() ? BigInt(0) : 0;
-    this.max = this.isBigInt() ? (BigInt(1) << BigInt(8 * size)) - BigInt(1) : 2 ** (8 * size) - 1; // eslint-disable-line no-bitwise
-  }
-
   isBigInt() {
     return this.size > MAX_INT_SIZE;
   }
 
   write(stream, value) {
     if (value === Infinity) {
-      value = this.max;
+      return stream.write(this.maxBuffer);
     }
     return this.isBigInt() ? stream.writeBigUInt(value, this.size) : stream.writeUInt(value, this.size);
   }
@@ -134,15 +136,13 @@ class IntCoder extends UIntCoder {
   constructor(size) {
     super(size);
     this.offset = this.isBigInt() ? BigInt(1) << (BigInt(size * 8 - 1)) : 2 ** (size * 8 - 1); // eslint-disable-line no-bitwise
-    this.min -= this.offset;
-    this.max -= this.offset;
   }
 
   write(stream, value) {
     if (value === Infinity) {
-      value = this.max;
+      return stream.write(this.maxBuffer);
     } else if (value === -Infinity) {
-      value = this.min;
+      return stream.write(this.minBuffer);
     } else if (this.isBigInt()) {
       value = BigInt(value);
     }
@@ -171,6 +171,9 @@ class HexCoder extends StaticCoder {
   }
 
   write(stream, value) {
+    if (value === Infinity) {
+      return stream.write(this.maxBuffer);
+    }
     return stream.writeHex(value, this.size);
   }
 
@@ -190,8 +193,12 @@ class BufferCoder extends StaticCoder {
     return undefined;
   }
 
-  write(stream, bytes) {
-    let buffer = Buffer.isBuffer(bytes) ? bytes : Buffer.from(bytes);
+  write(stream, value) {
+    if (value === Infinity) {
+      return stream.write(this.maxBuffer);
+    }
+
+    let buffer = Buffer.isBuffer(value) ? value : Buffer.from(value);
     if (buffer.length > this.size) {
       buffer = buffer.slice(0, this.size);
     } else if (buffer.length < this.size) {
@@ -267,3 +274,11 @@ class SchemaCoder extends StaticCoder {
 }
 
 module.exports = StaticCoder;
+module.exports.NullCoder = NullCoder;
+module.exports.NumberCoder = NumberCoder;
+module.exports.UIntCoder = UIntCoder;
+module.exports.IntCoder = IntCoder;
+module.exports.HexCoder = HexCoder;
+module.exports.BufferCoder = BufferCoder;
+module.exports.TupleCoder = TupleCoder;
+module.exports.SchemaCoder = SchemaCoder;

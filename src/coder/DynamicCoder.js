@@ -6,12 +6,16 @@ const StaticCoder = require('./StaticCoder');
 
 class DynamicCoder {
   static from(schema) {
-    return BufferCoder.from(schema)
+    return StaticCoder.NullCoder.from(schema)
+      || StaticCoder.NumberCoder.from(schema)
+      || StaticCoder.UIntCoder.from(schema)
+      || StaticCoder.IntCoder.from(schema)
+      || StaticCoder.BufferCoder.from(schema)
+      || BufferCoder.from(schema)
       || StringCoder.from(schema)
       || JsonCoder.from(schema)
       || ArrayCoder.from(schema)
-      || ObjectCoder.from(schema)
-      || StaticCoder.from(schema);
+      || ObjectCoder.from(schema);
   }
 
   read() {
@@ -162,3 +166,8 @@ class ObjectCoder extends DynamicCoder {
 }
 
 module.exports = DynamicCoder;
+module.exports.BufferCoder = BufferCoder;
+module.exports.StringCoder = StringCoder;
+module.exports.JsonCoder = JsonCoder;
+module.exports.ArrayCoder = ArrayCoder;
+module.exports.ObjectCoder = ObjectCoder;

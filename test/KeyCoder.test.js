@@ -31,7 +31,46 @@ test('Static', () => {
   });
 });
 
-test('StaticDynamic', () => {
+test('StaticDynamicObject', () => {
+  coder = KeyCoder.from(PREFIX, { age: 'uint', name: 'string' });
+
+  buffer = coder.encode({ age: 1 });
+  expect(buffer.toString('hex')).toEqual('fc000000000001');
+  expect(coder.decode(buffer)).toEqual({ age: 1, name: '' });
+
+  buffer = coder.encode({ age: 10, name: 'xyz', unexpected: 'haha' });
+  expect(buffer.toString('hex')).toEqual('fc00000000000a78797a');
+  expect(coder.decode(buffer)).toEqual({ age: 10, name: 'xyz' });
+
+  expect(coder.filter()).toEqual({
+    reverse: false,
+    keys: true,
+    values: true,
+    limit: -1,
+    gte: Buffer.from('fc000000000000', 'hex'),
+    lt: Buffer.from('fd000000000000', 'hex'),
+  });
+
+  expect(coder.filter({ min: { name: '', age: 0 }, max: { name: Infinity, age: Infinity } })).toEqual({
+    reverse: false,
+    keys: true,
+    values: true,
+    limit: -1,
+    gte: Buffer.from('fc000000000000', 'hex'),
+    lt: Buffer.from('fd000000000000', 'hex'),
+  });
+
+  expect(coder.filter({ min: { name: 'a', age: 1 }, max: { age: 1, name: 'b' } })).toEqual({
+    reverse: false,
+    keys: true,
+    values: true,
+    limit: -1,
+    gte: Buffer.from('fc00000000000161', 'hex'),
+    lte: Buffer.from('fc00000000000162', 'hex'),
+  });
+});
+
+test('StaticDynamicTuple', () => {
   coder = KeyCoder.from(PREFIX, ['uint', String]);
 
   buffer = coder.encode([1]);
