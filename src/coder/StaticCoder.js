@@ -1,5 +1,6 @@
 /* eslint-disable no-use-before-define */
 
+const assert = require('assert');
 const lodash = require('lodash');
 const ReadStream = require('../stream/ReadStream');
 const WriteStream = require('../stream/WriteStream');
@@ -8,22 +9,29 @@ const MAX_INT_SIZE = 6;
 
 class StaticCoder {
   static from(schema) {
-    const coder = NullCoder.from(schema)
-      || NumberCoder.from(schema)
-      || UIntCoder.from(schema)
-      || IntCoder.from(schema)
-      || HexCoder.from(schema)
-      || BufferCoder.from(schema)
-      || TupleCoder.from(schema)
-      || SchemaCoder.from(schema);
-
-    if (!coder) {
-      throw new Error(`can not create coder by schema ${schema}`);
+    for (const CoderType of [
+      NullCoder,
+      UIntCoder,
+      IntCoder,
+      HexCoder,
+      NumberCoder,
+      BufferCoder,
+      TupleCoder,
+      SchemaCoder,
+    ]) {
+      try {
+        return CoderType.from(schema);
+      } catch (e) {
+        // pass
+      }
     }
-    return coder;
+
+    throw new Error(`can not StaticCoder coder by schema ${schema}`);
   }
 
   constructor(size = 0) {
+    assert(Number.isInteger(size) && size >= 0, 'size must be unsigned integer');
+
     this.size = size;
   }
 
@@ -57,10 +65,9 @@ class StaticCoder {
 
 class NullCoder extends StaticCoder {
   static from(schema) {
-    if (schema === 'null' || schema === null) {
-      return new this();
-    }
-    return undefined;
+    assert(schema === 'null' || schema === null);
+
+    return new this();
   }
 
   write() {
@@ -74,10 +81,9 @@ class NullCoder extends StaticCoder {
 
 class NumberCoder extends StaticCoder {
   static from(schema) {
-    if (schema === 'number' || schema === Number) {
-      return new this();
-    }
-    return undefined;
+    assert(schema === 'number' || schema === Number);
+
+    return new this();
   }
 
   constructor() {
@@ -95,14 +101,9 @@ class NumberCoder extends StaticCoder {
 
 class UIntCoder extends StaticCoder {
   static from(schema) {
-    if (lodash.isString(schema)) {
-      const [/* uint */, bits] = schema.match(/^uint([0-9]*)$/) || [];
-      if (bits !== undefined) {
-        const size = bits === '' ? MAX_INT_SIZE : Math.ceil(Number(bits) / 8);
-        return new this(size);
-      }
-    }
-    return undefined;
+    const [/* uint */, bits] = schema.match(/^uint([0-9]*)$/) || [];
+    const size = bits === '' ? MAX_INT_SIZE : Math.ceil(Number(bits) / 8);
+    return new this(size);
   }
 
   isBigInt() {
@@ -123,14 +124,9 @@ class UIntCoder extends StaticCoder {
 
 class IntCoder extends UIntCoder {
   static from(schema) {
-    if (lodash.isString(schema)) {
-      const [/* int */, bits] = schema.match(/^int([0-9]*)$/) || [];
-      if (bits !== undefined) {
-        const size = bits === '' ? MAX_INT_SIZE : Math.ceil(Number(bits) / 8);
-        return new this(size);
-      }
-    }
-    return undefined;
+    const [/* int */, bits] = schema.match(/^int([0-9]*)$/) || [];
+    const size = bits === '' ? MAX_INT_SIZE : Math.ceil(Number(bits) / 8);
+    return new this(size);
   }
 
   constructor(size) {
@@ -157,13 +153,8 @@ class IntCoder extends UIntCoder {
 
 class HexCoder extends StaticCoder {
   static from(schema) {
-    if (lodash.isString(schema)) {
-      const [/* hex */, chars] = schema.match(/^hex([0-9]+)$/) || [];
-      if (chars !== undefined) {
-        return new this(Number(chars));
-      }
-    }
-    return undefined;
+    const [/* hex */, chars] = schema.match(/^hex([0-9]+)$/) || [];
+    return new this(Number(chars));
   }
 
   constructor(chars) {
@@ -184,13 +175,8 @@ class HexCoder extends StaticCoder {
 
 class BufferCoder extends StaticCoder {
   static from(schema) {
-    if (lodash.isString(schema)) {
-      const [/* buffer */, size] = schema.match(/^buffer([0-9]+)$/) || [];
-      if (size !== undefined) {
-        return new this(Number(size));
-      }
-    }
-    return undefined;
+    const [/* buffer */, size] = schema.match(/^buffer([0-9]+)$/) || [];
+    return new this(Number(size));
   }
 
   write(stream, value) {
@@ -218,10 +204,9 @@ class BufferCoder extends StaticCoder {
 
 class TupleCoder extends StaticCoder {
   static from(schema) {
-    if (Array.isArray(schema)) {
-      return new this(schema);
-    }
-    return undefined;
+    assert(Array.isArray(schema));
+
+    return new this(schema);
   }
 
   constructor(array) {
@@ -247,10 +232,9 @@ class TupleCoder extends StaticCoder {
 
 class SchemaCoder extends StaticCoder {
   static from(schema) {
-    if (lodash.isPlainObject(schema)) {
-      return new this(schema);
-    }
-    return undefined;
+    assert(lodash.isPlainObject(schema));
+
+    return new this(schema);
   }
 
   constructor(schema) {

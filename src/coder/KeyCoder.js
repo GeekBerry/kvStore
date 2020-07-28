@@ -28,28 +28,17 @@ class KeyCoder {
   static from(prefixBuffer, schema) {
     assert(Buffer.isBuffer(prefixBuffer), 'prefixBuffer must be Buffer');
 
-    try {
-      return StaticKeyCoder.from(prefixBuffer, schema);
-    } catch (e) {
-      // pass
-    }
-
-    try {
-      return StaticDynamicTupleKeyCoder.from(prefixBuffer, schema);
-    } catch (e) {
-      // pass
-    }
-
-    try {
-      return StaticDynamicObjectKeyCoder.from(prefixBuffer, schema);
-    } catch (e) {
-      // pass
-    }
-
-    try {
-      return DynamicKeyCoder.from(prefixBuffer, schema);
-    } catch (e) {
-      // pass
+    for (const CoderType of [
+      StaticKeyCoder,
+      StaticDynamicTupleKeyCoder,
+      StaticDynamicObjectKeyCoder,
+      DynamicKeyCoder,
+    ]) {
+      try {
+        return CoderType.from(prefixBuffer, schema);
+      } catch (e) {
+        // pass
+      }
     }
 
     throw new Error(`can not create KeyCoder by schema ${schema}`);

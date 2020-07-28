@@ -1,21 +1,33 @@
 /* eslint-disable no-use-before-define */
 
+const assert = require('assert');
 const lodash = require('lodash');
 const ReadStream = require('../stream/ReadStream');
 const StaticCoder = require('./StaticCoder');
 
 class DynamicCoder {
   static from(schema) {
-    return StaticCoder.NullCoder.from(schema)
-      || StaticCoder.NumberCoder.from(schema)
-      || StaticCoder.UIntCoder.from(schema)
-      || StaticCoder.IntCoder.from(schema)
-      || StaticCoder.BufferCoder.from(schema)
-      || BufferCoder.from(schema)
-      || StringCoder.from(schema)
-      || JsonCoder.from(schema)
-      || ArrayCoder.from(schema)
-      || ObjectCoder.from(schema);
+    for (const CoderType of [
+      StaticCoder.NullCoder,
+      StaticCoder.UIntCoder,
+      StaticCoder.IntCoder,
+      StaticCoder.HexCoder,
+      StaticCoder.NumberCoder,
+      StaticCoder.BufferCoder,
+      BufferCoder,
+      StringCoder,
+      JsonCoder,
+      ArrayCoder,
+      ObjectCoder,
+    ]) {
+      try {
+        return CoderType.from(schema);
+      } catch (e) {
+        // pass
+      }
+    }
+
+    throw new Error(`can not DynamicCoder coder by schema ${schema}`);
   }
 
   read() {
@@ -34,10 +46,9 @@ class DynamicCoder {
 
 class BufferCoder extends DynamicCoder {
   static from(schema) {
-    if (schema === 'buffer' || schema === Buffer) {
-      return new this();
-    }
-    return undefined;
+    assert(schema === 'buffer' || schema === Buffer);
+
+    return new this();
   }
 
   encode(value) {
@@ -52,10 +63,9 @@ class BufferCoder extends DynamicCoder {
 
 class StringCoder extends BufferCoder {
   static from(schema) {
-    if (schema === 'string' || schema === String) {
-      return new this();
-    }
-    return undefined;
+    assert(schema === 'string' || schema === String);
+
+    return new this();
   }
 
   decode(buffer) {
@@ -65,10 +75,9 @@ class StringCoder extends BufferCoder {
 
 class JsonCoder extends BufferCoder {
   static from(schema) {
-    if (schema === 'json' || schema === JSON) {
-      return new this();
-    }
-    return undefined;
+    assert(schema === 'json' || schema === JSON);
+
+    return new this();
   }
 
   encode(value) {
@@ -82,13 +91,9 @@ class JsonCoder extends BufferCoder {
 
 class ArrayCoder extends DynamicCoder {
   static from(schema) {
-    if (Array.isArray(schema)) {
-      if (schema.length !== 1) {
-        throw new Error(`${this.constructor.name} schema.length must be 1`);
-      }
-      return new this(schema);
-    }
-    return undefined;
+    assert(Array.isArray(schema) && schema.length === 1);
+
+    return new this(schema);
   }
 
   constructor(schema) {
@@ -127,10 +132,9 @@ class ArrayCoder extends DynamicCoder {
 
 class ObjectCoder extends DynamicCoder {
   static from(schema) {
-    if (lodash.isPlainObject(schema)) {
-      return new this(schema);
-    }
-    return undefined;
+    assert(lodash.isPlainObject(schema));
+
+    return new this(schema);
   }
 
   constructor(schema) {
