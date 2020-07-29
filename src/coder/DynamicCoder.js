@@ -5,6 +5,8 @@ const lodash = require('lodash');
 const ReadStream = require('../stream/ReadStream');
 const StaticCoder = require('./StaticCoder');
 
+const UINT_CODER = StaticCoder.from('uint');
+
 class DynamicCoder {
   static from(schema) {
     for (const CoderType of [
@@ -115,13 +117,12 @@ class ArrayCoder extends DynamicCoder {
   }
 
   encode(array) {
-    const uintCoder = StaticCoder.from('uint');
-    const bufferArray = [uintCoder.encode(array.length)];
+    const bufferArray = [UINT_CODER.encode(array.length)];
 
     array.forEach(value => {
       const buffer = this.coder.encode(value);
       if (this.coder instanceof BufferCoder) {
-        bufferArray.push(uintCoder.encode(buffer.length));
+        bufferArray.push(UINT_CODER.encode(buffer.length));
       }
       bufferArray.push(buffer);
     });
@@ -154,13 +155,12 @@ class ObjectCoder extends DynamicCoder {
   }
 
   encode(object) {
-    const uintCoder = StaticCoder.from('uint');
     const bufferArray = [];
 
     lodash.forEach(this.coderTable, (coder, key) => {
       const buffer = coder.encode(object[key]);
       if (coder instanceof BufferCoder) {
-        bufferArray.push(uintCoder.encode(buffer.length));
+        bufferArray.push(UINT_CODER.encode(buffer.length));
       }
       bufferArray.push(buffer);
     });
