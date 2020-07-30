@@ -11,6 +11,7 @@ class StaticCoder {
   static from(schema) {
     for (const CoderType of [
       NullCoder,
+      BooleanCoder,
       UIntCoder,
       IntCoder,
       HexCoder,
@@ -96,6 +97,26 @@ class NumberCoder extends StaticCoder {
 
   read(stream) {
     return stream.readNumber();
+  }
+}
+
+class BooleanCoder extends StaticCoder {
+  static from(schema) {
+    assert(schema === 'boolean' || schema === Boolean);
+
+    return new this();
+  }
+
+  constructor() {
+    super(1);
+  }
+
+  write(stream, value) {
+    stream.writeUInt(value ? 1 : 0, this.size);
+  }
+
+  read(stream) {
+    return Boolean(stream.readUInt(this.size));
   }
 }
 

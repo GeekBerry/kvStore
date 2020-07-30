@@ -4,6 +4,7 @@ const LevelDB = require('@geekberry/leveldb');
 const Operate = require('./Operate');
 const Binary = require('./Binary');
 const Text = require('./Text');
+const Table = require('./Table');
 
 class KVStore {
   constructor(options = {}) {
@@ -92,7 +93,7 @@ class KVStore {
   }
 
   /**
-   * @param name{string}
+   * @param name {string}
    * @return {Text}
    */
   Text(name) {
@@ -102,6 +103,21 @@ class KVStore {
 
     const instance = this._nameToInstance[name];
     assert(instance instanceof Text);
+    return instance;
+  }
+
+  /**
+   * @param name {string}
+   * @param options {object}
+   * @return {Table}
+   */
+  Table(name, options) {
+    if (!Reflect.has(this._nameToInstance, name)) {
+      this._nameToInstance[name] = new Table(this, name, options);
+    }
+
+    const instance = this._nameToInstance[name];
+    assert(instance instanceof Table);
     return instance;
   }
 }

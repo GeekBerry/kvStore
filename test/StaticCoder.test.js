@@ -10,6 +10,21 @@ test('null', () => {
   expect(coder.decode(buffer)).toEqual(null);
 });
 
+test('Boolean', () => {
+  const coder = StaticCoder.from('boolean');
+  expect(coder.size).toEqual(1);
+
+  let buffer;
+
+  buffer = coder.encode(true);
+  expect(buffer.toString('hex')).toEqual('01');
+  expect(coder.decode(buffer)).toEqual(true);
+
+  buffer = coder.encode(false);
+  expect(buffer.toString('hex')).toEqual('00');
+  expect(coder.decode(buffer)).toEqual(false);
+});
+
 test('Number', () => {
   const coder = StaticCoder.from('number');
   expect(coder.size).toEqual(8);
