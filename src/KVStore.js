@@ -17,10 +17,6 @@ class KVStore {
     } else {
       this.database = new LevelDB.Client(options);
     }
-
-    this.get = (...args) => this.database.get(...args);
-    this.list = (...args) => this.database.list(...args);
-    this.clear = (...args) => this.database.clear(...args);
   }
 
   /*
@@ -57,6 +53,25 @@ class KVStore {
     const batchOperate = new Operate.Batch(this.database);
     func(operate => batchOperate.push(operate));
     return batchOperate;
+  }
+
+  clear(options = {}) {
+    if (options.limit === Infinity) {
+      options.limit = -1;
+    }
+    return this.database.clear(options);
+  }
+
+  // --------------------------------------------------------------------------
+  get(key) {
+    return this.database.get(key);
+  }
+
+  list(options = {}) {
+    if (options.limit === Infinity) {
+      options.limit = -1;
+    }
+    return this.database.list(options);
   }
 
   // --------------------------------------------------------------------------

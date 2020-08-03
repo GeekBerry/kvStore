@@ -82,11 +82,10 @@ class StaticKeyCoder extends KeyCoder {
     this.MAX_KEY = Buffer.concat([this.prefixBuffer, Buffer.allocUnsafe(this.coder.size).fill(0xff)]);
   }
 
-  filter({ min, max, limit = Infinity, reverse = false, keys = true, values = true } = {}) {
-    const filter = { reverse, keys, values };
-    filter.limit = limit === Infinity ? -1 : limit;
-    filter.gte = min === undefined ? this.MIN_KEY : this.encode(min);
-    filter.lte = max === undefined ? this.MAX_KEY : this.encode(max);
+  filter(min = -Infinity, max = Infinity) {
+    const filter = {};
+    filter.gte = min === -Infinity ? this.MIN_KEY : this.encode(min);
+    filter.lte = max === Infinity ? this.MAX_KEY : this.encode(max);
     return filter;
   }
 
@@ -121,10 +120,10 @@ class StaticDynamicObjectKeyCoder extends StaticKeyCoder {
     this.dynamicKey = dynamicKey;
   }
 
-  filter({ min, max = Infinity, limit = Infinity, reverse = false, keys = true, values = true } = {}) {
-    const filter = { reverse, keys, values };
-    filter.limit = limit === Infinity ? -1 : limit;
-    filter.gte = min === undefined ? this.MIN_KEY : this.encode(min);
+  filter(min = -Infinity, max = Infinity) {
+    const filter = {};
+
+    filter.gte = min === -Infinity ? this.MIN_KEY : this.encode(min);
 
     if (max === Infinity) {
       filter.lt = incBuffer(this.MAX_KEY);
@@ -134,7 +133,7 @@ class StaticDynamicObjectKeyCoder extends StaticKeyCoder {
       filter.lte = this.encode(max);
     }
 
-    return lodash.pickBy(filter, v => v !== undefined);
+    return filter;
   }
 
   read(stream) {
@@ -176,18 +175,16 @@ class DynamicKeyCoder extends KeyCoder {
     this.dynamicCoder = dynamicCoder;
   }
 
-  filter({ min, max = Infinity, limit = Infinity, reverse = false, keys = true, values = true } = {}) {
-    const filter = { reverse, keys, values };
-    filter.limit = limit === Infinity ? -1 : limit;
-    filter.gte = min === undefined ? this.prefixBuffer : this.encode(min);
+  filter(min = -Infinity, max = Infinity) {
+    const filter = {};
+    filter.gte = min === -Infinity ? this.prefixBuffer : this.encode(min);
 
     if (max === Infinity) {
       filter.lt = incBuffer(this.prefixBuffer);
     } else {
       filter.lte = this.encode(max);
     }
-
-    return lodash.pickBy(filter, v => v !== undefined);
+    return filter;
   }
 
   read(stream) {

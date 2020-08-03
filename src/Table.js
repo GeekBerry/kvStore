@@ -148,42 +148,41 @@ class Table {
     return count || 0;
   }
 
-  async listKey({ skip = 0, limit = Infinity, ...rest } = {}) {
+  async listKey(options = {}) {
     const list = await this.binary.list({
-      ...rest,
-      limit: skip + limit,
+      ...options,
+      keys: true,
       value: false,
     });
-    return list.slice(skip).map(each => each.key);
+    return list.map(each => each.key);
   }
 
-  async list({ skip = 0, limit = Infinity, ...rest } = {}) {
+  async list(options = {}) {
     const list = await this.binary.list({
-      ...rest,
-      limit: skip + limit,
+      ...options,
       keys: false,
+      values: true,
     });
-    return list.slice(skip).map(each => each.value);
+    return list.map(each => each.value);
   }
 
-  async listIndex(name, { skip = 0, limit = Infinity, values = true, ...rest } = {}) {
+  async listIndex(name, options = {}) {
     const list = await this.indexMap[name].list({
-      ...rest,
-      limit: skip + limit,
+      ...options,
       keys: false,
-      values,
+      values: true,
     });
 
-    return list.slice(skip).map(each => each.value);
+    return list.map(each => each.value);
   }
 
-  async listGroup(name, { skip = 0, limit = Infinity, ...rest } = {}) {
+  async listGroup(name, options = {}) {
     const list = await this.groupMap[name].list({
-      ...rest,
-      limit: skip + limit,
+      ...options,
+      keys: true,
       values: false,
     });
-    return list.slice(skip).map(each => each.key);
+    return list.map(each => each.key);
   }
 }
 

@@ -55,6 +55,20 @@ test('list', async () => {
     { name: 'A', age: 16 },
   ]);
 
+  list = await table.list({ reverse: true, skip: 1 });
+  expect(list).toEqual([
+    { name: 'D', age: 18 },
+    { name: 'C', age: 18 },
+    { name: 'B', age: 16 },
+    { name: 'A', age: 16 },
+  ]);
+
+  list = await table.list({ reverse: true, skip: 1, limit: 2 });
+  expect(list).toEqual([
+    { name: 'D', age: 18 },
+    { name: 'C', age: 18 },
+  ]);
+
   list = await table.listIndex('age_name', {
     min: { age: 18, name: '' },
     max: { age: 18, name: Infinity },

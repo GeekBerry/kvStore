@@ -1,3 +1,4 @@
+const assert = require('assert');
 const lodash = require('lodash');
 const KeyCoder = require('./coder/KeyCoder');
 const DynamicCoder = require('./coder/DynamicCoder');
@@ -29,20 +30,27 @@ class Binary {
     return this.kvStore.del(keyBuffer);
   }
 
-  remove(options) {
-    return this.kvStore.clear(this.keyCoder.filter(options));
+  remove({ skip, limit = Infinity, min = -Infinity, max = Infinity, reverse = false } = {}) {
+    assert(skip === undefined, `remove not support skip, got ${skip}`);
+
+    return this.kvStore.clear({
+      ...this.keyCoder.filter(min, max),
+      limit,
+      reverse,
+    });
   }
 
-  async removeInner(options) {
-    const list = await this.listInner(options);
+  async removeInner({ skip, ...rest } = {}) {
+    assert(skip === undefined, `removeInner not support skip, got ${skip}`);
 
+    const array = await this.listInner(rest);
     await this.kvStore.batch(chain => {
-      list.forEach(entry => {
+      array.forEach(entry => {
         chain(this.kvStore.del(entry.path));
       });
     });
 
-    return list;
+    return array;
   }
 
   // --------------------------------------------------------------------------
@@ -52,22 +60,36 @@ class Binary {
     return valueBuffer === undefined ? undefined : this.valueCoder.decode(valueBuffer);
   }
 
-  async list(options) {
-    const array = await this.kvStore.list(this.keyCoder.filter(options));
+  async list({ skip = 0, limit = Infinity, min = -Infinity, max = Infinity, reverse = false, keys = true, values = true } = {}) {
+    assert(skip >= 0, `skip must >= 0, got ${skip}`);
+    assert(limit >= 0, `limit must >= 0, got ${limit}`);
 
-    return array.map(each => ({
-      path: each.key,
-      key: each.key.length ? this.keyCoder.decode(each.key) : undefined,
-      value: each.value.length ? this.valueCoder.decode(each.value) : undefined,
-    }));
+    const array = await this.kvStore.list({
+      ...this.keyCoder.filter(min, max),
+      limit: skip + limit,
+      reverse,
+      keys,
+      values,
+    });
+
+    return array
+      .slice(skip, skip + limit)
+      .map(each => ({
+        path: each.key,
+        key: each.key.length ? this.keyCoder.decode(each.key) : undefined,
+        value: each.value.length ? this.valueCoder.decode(each.value) : undefined,
+      }));
   }
 
-  async listInner({ min, max, limit = Infinity, ...rest } = {}) {
-    const array = await this.list({ ...rest, min, max, keys: true });
+  async listInner({ skip = 0, limit = Infinity, min, max, ...rest } = {}) {
+    assert(skip >= 0, `skip must >= 0, got ${skip}`);
+    assert(limit >= 0, `limit must >= 0, got ${limit}`);
+
+    const array = await this.list({ min, max, ...rest, keys: true }); // key is required
 
     return array
       .filter(each => compare(lodash.gte, each.key, min) && compare(lodash.lte, each.key, max))
-      .slice(0, limit);
+      .slice(skip, skip + limit);
   }
 }
 

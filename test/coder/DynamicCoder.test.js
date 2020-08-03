@@ -1,4 +1,4 @@
-const DynamicCoder = require('../src/coder/DynamicCoder');
+const DynamicCoder = require('../../src/coder/DynamicCoder');
 
 test('static', () => {
   const coder = DynamicCoder.from('uint');

@@ -1,4 +1,4 @@
-const StaticCoder = require('../src/coder/StaticCoder');
+const StaticCoder = require('../../src/coder/StaticCoder');
 
 test('null', () => {
   const coder = StaticCoder.from('null');
