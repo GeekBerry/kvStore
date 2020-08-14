@@ -4,28 +4,30 @@ const lodash = require('lodash');
 class Table {
   constructor(kvStore, name, {
     noMetadata,
-    schema,
     primary,
+    schema,
     indexMap,
     groupMap,
   }) {
     assert(schema[primary] !== undefined, 'schema primary is undefined');
 
     this.kvStore = kvStore;
+    this.name = name;
     this.noMetadata = noMetadata;
     this.primary = primary;
+    this.schema = schema;
 
     this.binary = kvStore.Binary(name, schema[primary], schema);
     this.counter = kvStore.Binary(`${name}.counter`, 'string', 'uint');
 
-    this.indexMap = lodash.mapValues(indexMap, fields => {
+    this.indexMap = lodash.mapValues(indexMap, (fields, indexName) => {
       assert(lodash.every(fields, f => schema[f] !== undefined), `some fields [${fields.join(',')}] not in schema`);
-      return kvStore.Binary(`${name}.index(${fields.join(',')})`, lodash.pick(schema, fields), schema[primary]);
+      return kvStore.Binary(`${name}.index.${indexName}`, lodash.pick(schema, fields), schema[primary]);
     });
 
-    this.groupMap = lodash.mapValues(groupMap, fields => {
+    this.groupMap = lodash.mapValues(groupMap, (fields, groupName) => {
       assert(lodash.every(fields, f => schema[f] !== undefined), `some fields [${fields.join(',')}] not in schema`);
-      return kvStore.Binary(`${name}.group(${fields.join(',')})`, lodash.pick(schema, fields), 'uint');
+      return kvStore.Binary(`${name}.group.${groupName}`, lodash.pick(schema, fields), 'uint');
     });
   }
 
