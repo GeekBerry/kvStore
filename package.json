@@ -1,6 +1,6 @@
 {
   "name": "@geekberry/kvstore",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "license": "MIT",
   "repository": "https://github.com/GeekBerry/kvStore.git",
   "author": "<geekberry@qq.com>",
