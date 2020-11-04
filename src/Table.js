@@ -118,7 +118,8 @@ class Table {
 
     // decrease group
     const total = await this.counter.get('') || 0;
-    operateArray.push(this.counter.set(undefined, total - array.length));
+    const totalCount = total - array.length;
+    operateArray.push(totalCount > 0 ? this.counter.set(undefined, totalCount) : this.counter.del(undefined));
 
     await Promise.all(lodash.map(this.groupMap, async (groupBinary, groupName) => {
       let groupCount = await this.counter.get(groupName) || 0;
@@ -131,10 +132,10 @@ class Table {
         if (count === 0) {
           groupCount -= 1;
         }
-        operateArray.push(count > 0 ? groupBinary.set(key, count) : groupBinary.del(key)); // drop will value === 0
+        operateArray.push(count > 0 ? groupBinary.set(key, count) : groupBinary.del(key));
       }));
 
-      operateArray.push(this.counter.set(groupName, groupCount));
+      operateArray.push(groupCount > 0 ? this.counter.set(groupName, groupCount) : this.counter.del(groupName));
     }));
 
     return operateArray;
